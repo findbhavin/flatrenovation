@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apartment 304 – Kitchen 3D Visualization</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; background: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; }
+  canvas { display: block; }
+  #hud {
+    position: fixed; top: 20px; left: 20px; color: #e0e0e0;
+    background: rgba(10,10,30,0.85); padding: 16px 22px; border-radius: 10px;
+    font-size: 13px; line-height: 1.6; pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+  }
+  #hud h2 { font-size: 15px; margin-bottom: 6px; color: #fff; letter-spacing: 0.5px; }
+  #hud .dim { color: #999; font-size: 11px; }
+  #legend {
+    position: fixed; bottom: 20px; left: 20px; color: #ccc;
+    background: rgba(10,10,30,0.85); padding: 14px 20px; border-radius: 10px;
+    font-size: 12px; line-height: 1.8; pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+  }
+  #legend span { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  #controls {
+    position: fixed; bottom: 20px; right: 20px; color: #999;
+    background: rgba(10,10,30,0.85); padding: 12px 18px; border-radius: 10px;
+    font-size: 11px; line-height: 1.7; pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <h2>Apartment 304 &mdash; Kitchen Master Plan</h2>
+  Footprint: 3.40m &times; 2.75m &times; 2.85m (100.64 sq ft)<br>
+  <span class="dim">Wall A (East) Preparation &bull; Wall B (South) Cooking &bull; Wall C (West) Utility</span>
+</div>
+
+<div id="legend">
+  <div><span style="background:#e8e8e8"></span>Arctic White Gloss Cabinetry</div>
+  <div><span style="background:#f5f0eb"></span>White Quartz Countertop</div>
+  <div><span style="background:#2a2a2a"></span>Appliances (Hob / Fridge / Dishwasher)</div>
+  <div><span style="background:#b0b0b0"></span>Stainless Steel (Sink / Hood)</div>
+  <div><span style="background:#87CEEB"></span>Window Glazing</div>
+</div>
+
+<div id="controls">
+  Orbit: Left-click + drag<br>
+  Zoom: Scroll wheel<br>
+  Pan: Right-click + drag
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Scene Setup ──────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50);
+// Camera positioned outside Wall D (North) looking in
+camera.position.set(1.7, 2.2, 5.0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(1.7, 1.2, 1.2);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 1.5;
+controls.maxDistance = 8;
+controls.update();
+
+// ── Constants (all in meters) ────────────────────────────────
+const ROOM_L = 3.40;   // X-axis (East-West span for Wall A)
+const ROOM_W = 2.75;   // Z-axis (North-South span)
+const ROOM_H = 2.85;   // Y-axis
+const WALL_T = 0.12;   // Wall thickness
+const BEAM_H = 2.50;   // Ceiling beam soffit from floor
+const BEAM_D = 0.35;   // Beam depth (hangs from ceiling)
+const COUNTER_D = 0.65;// Countertop depth
+const COUNTER_H = 0.87;// Standard counter height
+const BASE_KICK = 0.10;// Toe kick height
+const UPPER_BOT = 1.40;// Upper cabinet bottom edge
+const UPPER_TOP = BEAM_H;// Upper cabinet top = beam soffit
+const WIN_W = 1.50;    // Window width
+const WIN_SILL = 1.10; // Window sill height
+const WIN_HEAD = 2.20;  // Window head height
+
+// ── Materials ────────────────────────────────────────────────
+const matWall = new THREE.MeshStandardMaterial({ color: 0xf0ede8, roughness: 0.85, metalness: 0.0 });
+const matFloor = new THREE.MeshStandardMaterial({ color: 0xd9d0c7, roughness: 0.6, metalness: 0.05 });
+const matCeiling = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.9 });
+const matBeam = new THREE.MeshStandardMaterial({ color: 0xe8e4df, roughness: 0.7 });
+
+// Arctic White High-Gloss cabinetry
+const matCabinet = new THREE.MeshPhysicalMaterial({
+  color: 0xf2f2f2, roughness: 0.08, metalness: 0.02,
+  clearcoat: 0.9, clearcoatRoughness: 0.05, reflectivity: 0.6,
+});
+
+// White Quartz with subtle grey veining (countertop)
+const quartzCanvas = document.createElement('canvas');
+quartzCanvas.width = 512; quartzCanvas.height = 512;
+const qctx = quartzCanvas.getContext('2d');
+qctx.fillStyle = '#f5f0eb';
+qctx.fillRect(0, 0, 512, 512);
+qctx.strokeStyle = 'rgba(180,175,168,0.18)';
+qctx.lineWidth = 1.5;
+for (let i = 0; i < 30; i++) {
+  qctx.beginPath();
+  qctx.moveTo(Math.random() * 512, Math.random() * 512);
+  qctx.bezierCurveTo(
+    Math.random() * 512, Math.random() * 512,
+    Math.random() * 512, Math.random() * 512,
+    Math.random() * 512, Math.random() * 512
+  );
+  qctx.stroke();
+}
+const quartzTex = new THREE.CanvasTexture(quartzCanvas);
+const matQuartz = new THREE.MeshPhysicalMaterial({
+  map: quartzTex, roughness: 0.1, metalness: 0.02,
+  clearcoat: 0.7, clearcoatRoughness: 0.08,
+});
+
+const matStainless = new THREE.MeshStandardMaterial({ color: 0xc8c8c8, roughness: 0.25, metalness: 0.85 });
+const matBlackGlass = new THREE.MeshPhysicalMaterial({ color: 0x1a1a1a, roughness: 0.05, metalness: 0.3, clearcoat: 1.0 });
+const matAppliance = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.35, metalness: 0.5 });
+const matGlass = new THREE.MeshPhysicalMaterial({
+  color: 0x87CEEB, roughness: 0.05, metalness: 0.0,
+  transmission: 0.85, thickness: 0.01, transparent: true, opacity: 0.4,
+});
+const matLED = new THREE.MeshBasicMaterial({ color: 0xfff5e6 });
+const matGola = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.3, metalness: 0.7 });
+
+// ── Helper Functions ─────────────────────────────────────────
+function box(w, h, d, mat, x, y, z) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
+}
+
+// ── Room Shell ───────────────────────────────────────────────
+// Floor
+box(ROOM_L, 0.05, ROOM_W, matFloor, ROOM_L / 2, -0.025, ROOM_W / 2);
+
+// Ceiling
+box(ROOM_L, 0.05, ROOM_W, matCeiling, ROOM_L / 2, ROOM_H + 0.025, ROOM_W / 2);
+
+// Wall A – East (at x = ROOM_L)
+box(WALL_T, ROOM_H, ROOM_W, matWall, ROOM_L + WALL_T / 2, ROOM_H / 2, ROOM_W / 2);
+
+// Wall B – South (at z = 0), with window cutout modeled as two pillars + lintel + sill wall
+const winStart = (ROOM_L - WIN_W) / 2;
+const winEnd = winStart + WIN_W;
+// Left pillar
+box(winStart, ROOM_H, WALL_T, matWall, winStart / 2, ROOM_H / 2, -WALL_T / 2);
+// Right pillar
+const rightW = ROOM_L - winEnd;
+box(rightW, ROOM_H, WALL_T, matWall, winEnd + rightW / 2, ROOM_H / 2, -WALL_T / 2);
+// Sill wall (below window)
+box(WIN_W, WIN_SILL, WALL_T, matWall, ROOM_L / 2, WIN_SILL / 2, -WALL_T / 2);
+// Lintel (above window)
+const lintelH = ROOM_H - WIN_HEAD;
+box(WIN_W, lintelH, WALL_T, matWall, ROOM_L / 2, WIN_HEAD + lintelH / 2, -WALL_T / 2);
+// Window glass
+box(WIN_W, WIN_HEAD - WIN_SILL, 0.01, matGlass, ROOM_L / 2, (WIN_SILL + WIN_HEAD) / 2, -WALL_T / 2);
+// Window frame
+const frameMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.4, metalness: 0.3 });
+box(WIN_W + 0.04, 0.04, 0.05, frameMat, ROOM_L / 2, WIN_SILL, -WALL_T / 2); // sill frame
+box(WIN_W + 0.04, 0.04, 0.05, frameMat, ROOM_L / 2, WIN_HEAD, -WALL_T / 2); // head frame
+box(0.04, WIN_HEAD - WIN_SILL, 0.05, frameMat, winStart - 0.02, (WIN_SILL + WIN_HEAD) / 2, -WALL_T / 2);
+box(0.04, WIN_HEAD - WIN_SILL, 0.05, frameMat, winEnd + 0.02, (WIN_SILL + WIN_HEAD) / 2, -WALL_T / 2);
+
+// Wall C – West (at x = 0)
+box(WALL_T, ROOM_H, ROOM_W, matWall, -WALL_T / 2, ROOM_H / 2, ROOM_W / 2);
+
+// Wall D – North (at z = ROOM_W) — NOT rendered (camera portal)
+
+// ── Perimeter Ceiling Beam ───────────────────────────────────
+const beamThick = ROOM_H - BEAM_H; // 0.35m
+// Beam along Wall A
+box(BEAM_D, beamThick, ROOM_W, matBeam, ROOM_L - BEAM_D / 2, BEAM_H + beamThick / 2, ROOM_W / 2);
+// Beam along Wall B
+box(ROOM_L, beamThick, BEAM_D, matBeam, ROOM_L / 2, BEAM_H + beamThick / 2, BEAM_D / 2);
+// Beam along Wall C
+box(BEAM_D, beamThick, ROOM_W, matBeam, BEAM_D / 2, BEAM_H + beamThick / 2, ROOM_W / 2);
+
+// ═══════════════════════════════════════════════════════════════
+// WALL A – PREPARATION HUB (East Wall, full 3.40m along X)
+// Cabinetry runs along Z from 0 to ROOM_W at x ≈ ROOM_L
+// ═══════════════════════════════════════════════════════════════
+const wallA_x = ROOM_L - COUNTER_D / 2;
+const wallA_back = ROOM_L;
+
+// Base cabinets (kick + doors)
+const numBaseA = 5;
+const baseCabW = ROOM_W / numBaseA;
+for (let i = 0; i < numBaseA; i++) {
+  const z = baseCabW * i + baseCabW / 2;
+  // Toe kick
+  box(COUNTER_D - 0.08, BASE_KICK, baseCabW - 0.01, matGola, wallA_x, BASE_KICK / 2, z);
+  // Cabinet body
+  const bodyH = COUNTER_H - BASE_KICK - 0.03;
+  box(COUNTER_D, bodyH, baseCabW - 0.008, matCabinet, wallA_x, BASE_KICK + bodyH / 2, z);
+  // GOLA profile line
+  box(COUNTER_D - 0.04, 0.012, baseCabW - 0.02, matGola, wallA_x, COUNTER_H - 0.04, z);
+}
+
+// Countertop (Wall A)
+box(COUNTER_D + 0.02, 0.03, ROOM_W, matQuartz, wallA_x, COUNTER_H + 0.015, ROOM_W / 2);
+
+// Upper cabinets (Wall A)
+const upperH = UPPER_TOP - UPPER_BOT;
+const numUpperA = 5;
+const upperCabW = ROOM_W / numUpperA;
+for (let i = 0; i < numUpperA; i++) {
+  const z = upperCabW * i + upperCabW / 2;
+  box(0.35, upperH, upperCabW - 0.008, matCabinet, ROOM_L - 0.175, UPPER_BOT + upperH / 2, z);
+  // GOLA profile
+  box(0.30, 0.012, upperCabW - 0.02, matGola, ROOM_L - 0.175, UPPER_BOT + 0.01, z);
+}
+
+// Under-cabinet LED strip (Wall A)
+box(0.02, 0.008, ROOM_W - 0.10, matLED, ROOM_L - 0.36, UPPER_BOT - 0.01, ROOM_W / 2);
+
+// Built-in Microwave (Wall A) – placed in 2nd upper cabinet slot
+const microX = ROOM_L - 0.175;
+const microZ = upperCabW * 1 + upperCabW / 2;
+box(0.40, 0.30, 0.52, matAppliance, microX, UPPER_BOT + 0.55, microZ);
+// Microwave door glass
+box(0.01, 0.24, 0.44, matBlackGlass, microX - 0.20, UPPER_BOT + 0.55, microZ);
+
+// Water Purifier (RO) – under sink area, modeled on Wall A far end
+box(0.30, 0.45, 0.20, matAppliance, ROOM_L - 0.30, BASE_KICK + 0.225, ROOM_W - 0.30);
+
+// ═══════════════════════════════════════════════════════════════
+// WALL B – COOKING HUB (South Wall, 2.75m along Z at z ≈ 0)
+// Cabinetry along X-axis near z = 0
+// ═══════════════════════════════════════════════════════════════
+const wallB_z = COUNTER_D / 2;
+
+// Base cabinets (Wall B) – 3 units flanking the hob
+const numBaseB = 4;
+const baseBW = ROOM_L / numBaseB;
+for (let i = 0; i < numBaseB; i++) {
+  const x = baseBW * i + baseBW / 2;
+  // Toe kick
+  box(baseBW - 0.01, BASE_KICK, COUNTER_D - 0.08, matGola, x, BASE_KICK / 2, wallB_z);
+  // Cabinet body
+  const bodyH = COUNTER_H - BASE_KICK - 0.03;
+  box(baseBW - 0.008, bodyH, COUNTER_D, matCabinet, x, BASE_KICK + bodyH / 2, wallB_z);
+  // GOLA profile
+  box(baseBW - 0.02, 0.012, COUNTER_D - 0.04, matGola, x, COUNTER_H - 0.04, wallB_z);
+}
+
+// Countertop (Wall B)
+box(ROOM_L, 0.03, COUNTER_D + 0.02, matQuartz, ROOM_L / 2, COUNTER_H + 0.015, wallB_z);
+
+// 3-Burner Gas Hob – centered on Wall B, aligned with window
+const hobX = ROOM_L / 2;
+const hobZ = COUNTER_D / 2;
+box(0.77, 0.025, 0.51, matBlackGlass, hobX, COUNTER_H + 0.04, hobZ);
+// Burner rings
+const burnerMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.3, metalness: 0.8 });
+const burnerPositions = [
+  [hobX - 0.24, hobZ - 0.08],
+  [hobX + 0.24, hobZ - 0.08],
+  [hobX, hobZ + 0.10],
+];
+burnerPositions.forEach(([bx, bz]) => {
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.06, 0.008, 8, 24),
+    burnerMat
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(bx, COUNTER_H + 0.06, bz);
+  scene.add(ring);
+  // Grate
+  const grate = new THREE.Mesh(
+    new THREE.TorusGeometry(0.07, 0.005, 4, 4),
+    burnerMat
+  );
+  grate.rotation.x = -Math.PI / 2;
+  grate.position.set(bx, COUNTER_H + 0.065, bz);
+  scene.add(grate);
+});
+
+// Chimney Hood – stainless steel, above hob
+box(0.80, 0.15, 0.50, matStainless, hobX, WIN_SILL + 0.10, 0.28);
+// Chimney flue
+box(0.30, WIN_HEAD - WIN_SILL - 0.10, 0.25, matStainless, hobX, (WIN_SILL + 0.20 + BEAM_H) / 2, 0.15);
+
+// Window exhaust fan (small unit in upper-right of window)
+box(0.25, 0.25, 0.08, matAppliance, winEnd - 0.20, WIN_HEAD - 0.20, -WALL_T / 2 + 0.04);
+
+// ═══════════════════════════════════════════════════════════════
+// WALL C – UTILITY HUB (West Wall, along Z at x ≈ 0)
+// North end: Fridge → 1.20m gap → Dishwasher → Sink
+// ═══════════════════════════════════════════════════════════════
+
+// Double Door Refrigerator – at North end of Wall C (high Z)
+const fridgeW = 0.80, fridgeD = 0.70, fridgeH = 1.75;
+const fridgeX = fridgeD / 2;
+const fridgeZ = ROOM_W - fridgeW / 2 - 0.05;
+box(fridgeD, fridgeH, fridgeW, matAppliance, fridgeX, fridgeH / 2, fridgeZ);
+// Fridge doors split line
+box(0.01, fridgeH - 0.10, 0.01, matStainless, fridgeD + 0.005, fridgeH / 2, fridgeZ);
+// Fridge handles
+box(0.02, 0.30, 0.03, matStainless, fridgeD + 0.01, fridgeH * 0.6, fridgeZ + 0.15);
+box(0.02, 0.30, 0.03, matStainless, fridgeD + 0.01, fridgeH * 0.6, fridgeZ - 0.15);
+
+// ── 1.20m BIM Clearance Gap ─────────────────────────────────
+// Gap from fridgeZ - fridgeW/2 - 0.05 going south for 1.20m
+const gapStart = fridgeZ - fridgeW / 2 - 0.05;
+const gapEnd = gapStart - 1.20;
+
+// Dishwasher – 0.60m integrated, south of gap
+const dwW = 0.60, dwD = 0.60, dwH = 0.82;
+const dwZ = gapEnd - dwW / 2;
+// Base cabinet surround for dishwasher
+box(COUNTER_D, COUNTER_H - 0.03, dwW + 0.04, matCabinet, COUNTER_D / 2, (COUNTER_H - 0.03) / 2, dwZ);
+// Dishwasher front panel
+box(0.02, dwH - 0.05, dwW - 0.02, matAppliance, COUNTER_D + 0.01, dwH / 2, dwZ);
+// Dishwasher handle
+box(0.02, 0.02, dwW - 0.10, matStainless, COUNTER_D + 0.02, dwH * 0.92, dwZ);
+
+// Sink unit – south of dishwasher
+const sinkW = 0.61, sinkD = 0.46;
+const sinkZ = dwZ - dwW / 2 - sinkW / 2 - 0.05;
+// Sink base cabinet
+box(COUNTER_D, COUNTER_H - 0.03, sinkW + 0.10, matCabinet, COUNTER_D / 2, (COUNTER_H - 0.03) / 2, sinkZ);
+// GOLA profile
+box(COUNTER_D - 0.04, 0.012, sinkW + 0.08, matGola, COUNTER_D / 2, COUNTER_H - 0.04, sinkZ);
+
+// Countertop for Wall C (dishwasher + sink section)
+const counterC_len = dwW + sinkW + 0.20;
+const counterC_z = (dwZ + sinkZ) / 2;
+box(COUNTER_D + 0.02, 0.03, counterC_len, matQuartz, COUNTER_D / 2, COUNTER_H + 0.015, counterC_z);
+
+// Sink basin (recessed into countertop)
+const sinkBasin = new THREE.Mesh(
+  new THREE.BoxGeometry(sinkD, 0.18, sinkW),
+  matStainless
+);
+sinkBasin.position.set(COUNTER_D / 2, COUNTER_H - 0.06, sinkZ);
+scene.add(sinkBasin);
+
+// Faucet
+const faucetBase = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.015, 0.02, 0.30, 12),
+  matStainless
+);
+faucetBase.position.set(COUNTER_D / 2 + 0.10, COUNTER_H + 0.15, sinkZ);
+scene.add(faucetBase);
+// Faucet spout
+const spout = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.01, 0.01, 0.15, 8),
+  matStainless
+);
+spout.rotation.z = Math.PI / 2;
+spout.position.set(COUNTER_D / 2 + 0.03, COUNTER_H + 0.30, sinkZ);
+scene.add(spout);
+
+// Upper cabinets for Wall C (above dishwasher/sink area)
+const upperC_count = 2;
+const upperC_w = counterC_len / upperC_count;
+for (let i = 0; i < upperC_count; i++) {
+  const z = counterC_z - counterC_len / 2 + upperC_w * i + upperC_w / 2;
+  box(0.35, upperH, upperC_w - 0.008, matCabinet, 0.175, UPPER_BOT + upperH / 2, z);
+  box(0.30, 0.012, upperC_w - 0.02, matGola, 0.175, UPPER_BOT + 0.01, z);
+}
+
+// Under-cabinet LED strip (Wall C)
+box(0.02, 0.008, counterC_len - 0.10, matLED, 0.36, UPPER_BOT - 0.01, counterC_z);
+
+// ═══════════════════════════════════════════════════════════════
+// Corner Integration – Wall A / Wall B junction countertop
+// ═══════════════════════════════════════════════════════════════
+// Small filler piece at the corner where Wall A meets Wall B
+box(COUNTER_D, 0.03, COUNTER_D, matQuartz, wallA_x, COUNTER_H + 0.015, wallB_z);
+
+// ═══════════════════════════════════════════════════════════════
+// LIGHTING
+// ═══════════════════════════════════════════════════════════════
+
+// Ambient light
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+// Main ceiling downlights
+const dlPositions = [
+  [ROOM_L * 0.3, ROOM_W * 0.3],
+  [ROOM_L * 0.7, ROOM_W * 0.3],
+  [ROOM_L * 0.3, ROOM_W * 0.7],
+  [ROOM_L * 0.7, ROOM_W * 0.7],
+  [ROOM_L * 0.5, ROOM_W * 0.5],
+];
+dlPositions.forEach(([x, z]) => {
+  const dl = new THREE.PointLight(0xfff5e0, 0.6, 5.0, 1.5);
+  dl.position.set(x, BEAM_H - 0.05, z);
+  dl.castShadow = true;
+  dl.shadow.mapSize.set(512, 512);
+  scene.add(dl);
+  // Light fixture visual
+  const fixture = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.06, 0.03, 16),
+    new THREE.MeshBasicMaterial({ color: 0xfff8ee })
+  );
+  fixture.position.set(x, BEAM_H - 0.02, z);
+  scene.add(fixture);
+});
+
+// Natural light from window (directional)
+const sunLight = new THREE.DirectionalLight(0xfff8e7, 1.0);
+sunLight.position.set(ROOM_L / 2, 3.5, -3);
+sunLight.target.position.set(ROOM_L / 2, 1, ROOM_W / 2);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(1024, 1024);
+sunLight.shadow.camera.near = 0.5;
+sunLight.shadow.camera.far = 10;
+sunLight.shadow.camera.left = -3;
+sunLight.shadow.camera.right = 3;
+sunLight.shadow.camera.top = 3;
+sunLight.shadow.camera.bottom = -1;
+scene.add(sunLight);
+scene.add(sunLight.target);
+
+// Subtle fill from open Wall D (north)
+const fillLight = new THREE.DirectionalLight(0xe8eeff, 0.3);
+fillLight.position.set(ROOM_L / 2, 2, ROOM_W + 3);
+scene.add(fillLight);
+
+// ═══════════════════════════════════════════════════════════════
+// DIMENSION ANNOTATIONS (floor lines)
+// ═══════════════════════════════════════════════════════════════
+function addDimensionLine(start, end, color = 0xff6644) {
+  const mat = new THREE.LineBasicMaterial({ color });
+  const geo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(...start),
+    new THREE.Vector3(...end),
+  ]);
+  scene.add(new THREE.Line(geo, mat));
+}
+
+// Room length (X)
+addDimensionLine([0, 0.01, ROOM_W + 0.15], [ROOM_L, 0.01, ROOM_W + 0.15]);
+// Room width (Z)
+addDimensionLine([-0.15, 0.01, 0], [-0.15, 0.01, ROOM_W]);
+// BIM Clearance gap on Wall C
+addDimensionLine([-0.25, 0.01, gapEnd], [-0.25, 0.01, gapStart], 0x44aaff);
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER LOOP
+// ═══════════════════════════════════════════════════════════════
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// Responsive
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
