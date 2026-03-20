@@ -51,8 +51,8 @@
   <button id="btn-perspective" class="active" onclick="setView('perspective')">Perspective</button>
   <button id="btn-top" onclick="setView('top')">Top / Plan</button>
   <button id="btn-front" onclick="setView('front')">Front (South)</button>
-  <button id="btn-wallA" onclick="setView('wallA')">Wall A (West)</button>
-  <button id="btn-wallC" onclick="setView('wallC')">Wall C (East)</button>
+  <button id="btn-wallC" onclick="setView('wallC')">Wall C (West)</button>
+  <button id="btn-wallA" onclick="setView('wallA')">Wall A (East)</button>
   <button id="btn-entrance" onclick="setView('entrance')">From Entrance</button>
   <div class="sep"></div>
   <label><input type="checkbox" id="chk-dims" checked onchange="toggleDims()"> Dimensions</label>
@@ -287,7 +287,7 @@ function drawWalls() {
   const wmr = project(wl+1500, 1700, 0);
   ctx.beginPath(); ctx.moveTo(wml.x, wml.y); ctx.lineTo(wmr.x, wmr.y); ctx.stroke();
 
-  // West wall (Wall A)
+  // West wall (Wall C)
   const wallA = [[0,0,2750],[0,0,0],[0,2850,0],[0,2850,2750]].map(v => project(...v));
   ctx.beginPath();
   wallA.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
@@ -295,7 +295,7 @@ function drawWalls() {
   ctx.fillStyle = '#202038';
   ctx.fill();
 
-  // East wall (Wall C)
+  // East wall (Wall A)
   const wallC = [[3400,0,0],[3400,0,2750],[3400,2850,2750],[3400,2850,0]].map(v => project(...v));
   ctx.beginPath();
   wallC.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
@@ -322,20 +322,20 @@ function drawKitchen() {
   const totalBase = plinth + baseH; // 850
   const wallCabBot = 1500, wallCabH = 400, wallCabD = 370;
 
-  // ---- WALL A (West / x=0 side, along Z axis) ----
+  // ---- WALL C (West / x=0 side, along Z axis) ----
   // Base: 60cm drawer unit + 2x 80cm shelf units = 220cm
   drawBox(0, plinth, 2750-650, 650, baseH, 600, '#e8e8e0', 'Drawers 60');
   drawBox(0, plinth, 2750-650-600, 650, baseH, 800, '#e8e8e0', 'Shelf 80');
   drawBox(0, plinth, 2750-650-600-800, 650, baseH, 800, '#e8e8e0', 'Shelf 80');
-  // Countertop Wall A
+  // Countertop Wall C
   drawBox(0, totalBase, 2750-ctrDepth-600-800-800, ctrDepth, ctrTop, 600+800+800, '#f5f0e0', '');
-  // Wall cabinets Wall A: 3x 80cm horizontal
+  // Wall cabinets Wall C: 3x 80cm horizontal
   drawBox(0, wallCabBot, 2750-wallCabD-0, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
   drawBox(0, wallCabBot, 2750-wallCabD-800, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
   drawBox(0, wallCabBot, 2750-wallCabD-1600, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
 
   // ---- WALL B (South / z=0 side, along X axis) ----
-  // Blind corner left (connects to Wall A)
+  // Blind corner left (connects to Wall C)
   drawBox(0, plinth, 0, 680, baseH, 650, '#e0e0d8', 'Blind Corner');
   // Hob cabinet 80cm center
   drawBox(680, plinth, 0, 800, baseH, 650, '#e8e8e0', 'Hob 80');
@@ -345,14 +345,14 @@ function drawKitchen() {
   drawBox(840, totalBase+ctrTop+10, 180, 60, 5, 60, '#c0392b', '');
   drawBox(1040, totalBase+ctrTop+10, 180, 60, 5, 60, '#c0392b', '');
   drawBox(1240, totalBase+ctrTop+10, 180, 60, 5, 60, '#c0392b', '');
-  // Blind corner right (connects to Wall C)
+  // Blind corner right (connects to Wall A)
   drawBox(1480, plinth, 0, 680, baseH, 650, '#e0e0d8', 'Blind Corner');
   // Countertop Wall B
   drawBox(0, totalBase, 0, 2160, ctrTop, ctrDepth, '#f5f0e0', '');
   // Chimney above hob
   drawBox(780, 1100, 0, 600, 1100, 480, '#5a5a5a', 'Chimney');
 
-  // ---- WALL C (East / x=3400 side, along Z axis) ----
+  // ---- WALL A (East / x=3400 side, along Z axis) ----
   // Tall unit: Oven + Microwave (60x60x220)
   drawBox(3400-600, plinth, 0, 600, 2200-plinth, 600, '#7f8c8d', '');
   // Oven inside tall unit
@@ -368,10 +368,10 @@ function drawKitchen() {
   // Dishwasher (60cm)
   drawBox(3400-600, plinth, 1200, 600, baseH, 600, '#4a4a4a', 'D/Washer');
 
-  // Countertop Wall C (sink + dishwasher area)
+  // Countertop Wall A (sink + dishwasher area)
   drawBox(3400-ctrDepth, totalBase, 600, ctrDepth, ctrTop, 1200, '#f5f0e0', '');
 
-  // Fridge gap (80cm) at north end of Wall C
+  // Fridge gap (80cm) at north end of Wall A
   drawBox(3400-800, plinth, 2750-700, 800, 1750-plinth, 700, '#3d3d3d', 'Fridge');
 
   // Backsplash hints
@@ -423,8 +423,8 @@ function setView(name) {
     perspective: { az: -35, el: 25, dist: 6500, target: [1700, 800, 1375], label: 'Perspective View' },
     top:         { az: 0,   el: 89, dist: 6000, target: [1700, 0, 1375], label: 'Top / Plan View' },
     front:       { az: 0,   el: 8,  dist: 5500, target: [1700, 1000, 0], label: 'Front View (South Wall B)' },
-    wallA:       { az: 90,  el: 8,  dist: 5500, target: [0, 1000, 1375], label: 'Wall A View (West – Prep Zone)' },
-    wallC:       { az: -90, el: 8,  dist: 5500, target: [3400, 1000, 1375], label: 'Wall C View (East – Utility Hub)' },
+    wallC:       { az: 90,  el: 8,  dist: 5500, target: [0, 1000, 1375], label: 'Wall C View (West – Prep Zone)' },
+    wallA:       { az: -90, el: 8,  dist: 5500, target: [3400, 1000, 1375], label: 'Wall A View (East – Utility Hub)' },
     entrance:    { az: 180, el: 15, dist: 6000, target: [1700, 800, 2750], label: 'From Entrance (North)' },
   };
 
