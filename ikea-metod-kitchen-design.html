@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKEA METOD Design Guidelines – Apartment 304 Kitchen</title>
+<style>
+  :root {
+    --primary: #0058a3;
+    --accent: #ffdb00;
+    --dark: #111;
+    --light: #f5f5f0;
+    --card-bg: #ffffff;
+    --border: #e0e0e0;
+    --text: #333;
+    --muted: #777;
+    --success: #2d8a4e;
+    --warn: #e07000;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--light); color: var(--text); line-height: 1.6;
+  }
+  header {
+    background: var(--primary); color: #fff; padding: 32px 40px;
+    border-bottom: 5px solid var(--accent);
+  }
+  header h1 { font-size: 28px; font-weight: 700; letter-spacing: 0.5px; }
+  header p { font-size: 14px; opacity: 0.85; margin-top: 6px; }
+  header .badge {
+    display: inline-block; background: var(--accent); color: var(--dark);
+    padding: 3px 12px; border-radius: 4px; font-size: 12px; font-weight: 700;
+    margin-top: 10px;
+  }
+  .container { max-width: 1280px; margin: 0 auto; padding: 30px 40px 60px; }
+  nav.toc {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px 28px; margin-bottom: 30px;
+  }
+  nav.toc h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+  nav.toc ol { padding-left: 20px; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { color: var(--primary); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { text-decoration: underline; }
+  section { margin-bottom: 36px; }
+  h2 {
+    font-size: 20px; color: var(--primary); border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px; margin-bottom: 18px;
+  }
+  h3 { font-size: 16px; color: var(--dark); margin: 16px 0 8px; }
+  h4 { font-size: 14px; color: var(--primary); margin: 12px 0 6px; }
+  p, li { font-size: 14px; }
+  ul, ol { padding-left: 22px; margin-bottom: 10px; }
+  li { margin: 3px 0; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px 24px; margin-bottom: 18px;
+  }
+  .card-header {
+    font-size: 16px; font-weight: 700; color: var(--dark);
+    margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0 16px;
+    font-size: 13px; background: var(--card-bg);
+  }
+  th {
+    background: var(--primary); color: #fff; padding: 10px 12px;
+    text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f8f8f5; }
+  tr:hover td { background: #eef4fb; }
+  .highlight { background: #fff9e0; border-left: 4px solid var(--accent); padding: 12px 16px; margin: 12px 0; border-radius: 4px; font-size: 13px; }
+  .note { background: #eef4fb; border-left: 4px solid var(--primary); padding: 12px 16px; margin: 12px 0; border-radius: 4px; font-size: 13px; }
+  .warn { background: #fff3e6; border-left: 4px solid var(--warn); padding: 12px 16px; margin: 12px 0; border-radius: 4px; font-size: 13px; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 600; margin-right: 4px;
+  }
+  .tag-blue { background: #dbeafe; color: #1e40af; }
+  .tag-green { background: #dcfce7; color: #166534; }
+  .tag-orange { background: #ffedd5; color: #9a3412; }
+  .tag-gray { background: #f3f4f6; color: #374151; }
+  .flow-diagram {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 16px; background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; margin: 12px 0;
+  }
+  .flow-step {
+    background: var(--primary); color: #fff; padding: 10px 18px;
+    border-radius: 6px; font-size: 13px; font-weight: 600;
+  }
+  .flow-arrow { font-size: 20px; color: var(--primary); font-weight: 700; }
+  .room-diagram {
+    background: #fff; border: 2px solid var(--border); border-radius: 8px;
+    padding: 20px; font-family: 'Courier New', monospace; font-size: 12px;
+    line-height: 1.4; overflow-x: auto; margin: 12px 0;
+  }
+  .spec-value { font-weight: 700; color: var(--primary); }
+  footer {
+    background: var(--dark); color: #aaa; text-align: center;
+    padding: 20px; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>IKEA METOD Design Guidelines</h1>
+  <p>Apartment 304 &mdash; Extended Open U-Shape Kitchen &mdash; 3.40m &times; 2.75m</p>
+  <span class="badge">FULL DIMENSIONAL TECHNICAL MASTER SPECIFICATION</span>
+</header>
+
+<div class="container">
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#system-core">System Core: METOD &amp; MAXIMERA</a></li>
+    <li><a href="#wall-a">Wall A: Preparation Zone (Left / West)</a></li>
+    <li><a href="#wall-b">Wall B: Cooking Hub (South / Bottom)</a></li>
+    <li><a href="#wall-c">Wall C: Utility &amp; Appliance Hub (Right / East)</a></li>
+    <li><a href="#design-rules">Technical Design Rules (The "IKEA Way")</a></li>
+    <li><a href="#planner">Planner Coordinates</a></li>
+    <li><a href="#structural">Structural &amp; Civil Measurements</a></li>
+    <li><a href="#cabinetry">Kitchen Cabinetry &amp; Countertop Standards</a></li>
+    <li><a href="#appliances">Appliance Technical Specifications</a></li>
+    <li><a href="#utensils">Utensil &amp; Storage Item Dimensions</a></li>
+    <li><a href="#mep">MEP Point Coordinates</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<!-- 1. SYSTEM CORE -->
+<!-- ============================================================ -->
+<section id="system-core">
+  <h2>1. System Core: METOD &amp; MAXIMERA</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">Cabinet System</div>
+      <ul>
+        <li><strong>System:</strong> METOD cabinet system for maximum modularity</li>
+        <li><strong>Drawers:</strong> MAXIMERA high-end drawers (soft-close, full extension) for all base units</li>
+        <li><strong>Hinges:</strong> UTRUSTA 110&deg; or 153&deg; hinges with integrated dampers</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header">Front Finishes</div>
+      <ul>
+        <li><strong>Option A:</strong> <span class="tag tag-blue">RINGHULT</span> High-Gloss White</li>
+        <li><strong>Option B:</strong> <span class="tag tag-blue">VOXTORP</span> White with integrated handles</li>
+        <li>Both match the <strong>"Arctic White"</strong> requirement</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. WALL A -->
+<!-- ============================================================ -->
+<section id="wall-a">
+  <h2>2. Wall A: Preparation Zone (Left / West)</h2>
+
+  <div class="card">
+    <div class="card-header">Base Units</div>
+    <table>
+      <tr><th>Qty</th><th>Component</th><th>Size</th><th>Configuration</th></tr>
+      <tr><td>1&times;</td><td>METOD Base cabinet for drawers</td><td>60 &times; 60 cm</td><td>4-drawer configuration</td></tr>
+      <tr><td>2&times;</td><td>METOD Base cabinets with shelves</td><td>80 &times; 60 cm</td><td>Standard shelving</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Wall Units</div>
+    <table>
+      <tr><th>Qty</th><th>Component</th><th>Size</th><th>Notes</th></tr>
+      <tr><td>3&times;</td><td>METOD Wall cabinets with horizontal lift-up doors</td><td>80 &times; 40 cm</td><td>Keeps the space open and accessible</td></tr>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <strong>Finishing:</strong> Use FORB&Auml;TTRA high-gloss white cover panels for the side facing the Drawing Hall.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. WALL B -->
+<!-- ============================================================ -->
+<section id="wall-b">
+  <h2>3. Wall B: Cooking Hub (South / Bottom)</h2>
+
+  <div class="card">
+    <div class="card-header">Base Units</div>
+    <table>
+      <tr><th>Qty</th><th>Component</th><th>Size</th><th>Notes</th></tr>
+      <tr><td>1&times;</td><td>METOD Hob cabinet for drawers</td><td>80 &times; 60 cm</td><td>Top drawer is a dummy/fixed panel for the hob</td></tr>
+      <tr><td>2&times;</td><td>METOD Blind Corner Base cabinets</td><td>128 &times; 68 cm</td><td>Connects to Wall A and Wall C</td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Appliances:</strong> Use F&Ouml;RDELAKTIG or similar IKEA integrated induction/gas hobs.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4. WALL C -->
+<!-- ============================================================ -->
+<section id="wall-c">
+  <h2>4. Wall C: Utility &amp; Appliance Hub (Right / East)</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">High Units</div>
+      <table>
+        <tr><th>Qty</th><th>Component</th><th>Size</th></tr>
+        <tr><td>1&times;</td><td>METOD High cabinet for Oven/Microwave</td><td>60 &times; 60 &times; 220 cm</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header">Base Units</div>
+      <table>
+        <tr><th>Qty</th><th>Component</th><th>Size</th></tr>
+        <tr><td>1&times;</td><td>METOD Base cabinet for Sink</td><td>60 &times; 60 cm</td></tr>
+        <tr><td>1&times;</td><td>Dishwasher integration</td><td>60 cm wide</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Dishwasher:</strong> Use BEHJ&Auml;LPLIG sliding hinge if using a non-IKEA dishwasher.
+  </div>
+  <div class="highlight">
+    <strong>Fridge:</strong> Leave an 80 cm gap at the North end. Use FORB&Auml;TTRA cover panels to box it in for a built-in look.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. DESIGN RULES -->
+<!-- ============================================================ -->
+<section id="design-rules">
+  <h2>5. Technical Design Rules (The "IKEA Way")</h2>
+
+  <div class="card">
+    <div class="card-header">The Work Triangle (U-Shape)</div>
+    <div class="flow-diagram">
+      <div class="flow-step">1. Storage (Fridge)<br><small>Wall C &mdash; Top Corner</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">2. Cleaning (Sink)<br><small>Wall C &mdash; Middle</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">3. Prep Zone<br><small>Wall A</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">4. Cooking (Hob)<br><small>Wall B &mdash; Center</small></div>
+    </div>
+    <p style="margin-top:8px; font-size:13px; color:var(--muted);">Path: Fridge &rarr; Sink &rarr; Prep (Wall A) &rarr; Hob &mdash; creates a perfect ergonomic flow.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">Structural Beam Management</div>
+      <p>The <span class="spec-value">0.35m</span> ceiling beam prevents wall cabinets reaching full 2.85m height.</p>
+      <ul style="margin-top:8px;">
+        <li>Install 60 cm or 80 cm high wall cabinets starting at <span class="spec-value">1.50m</span> from floor level</li>
+        <li>Use UTRUSTA LED lighting strips underneath cabinets</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header">Countertop &amp; Plinth</div>
+      <ul>
+        <li><strong>Worktop:</strong> KLYKET (Quartz) or custom-cut white quartz with 1.5 cm overhang</li>
+        <li><strong>Plinth:</strong> METOD 8 cm plinth in high-gloss white</li>
+        <li>Use the clip-on system for easy cleaning access</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6. PLANNER COORDINATES -->
+<!-- ============================================================ -->
+<section id="planner">
+  <h2>6. Planner Coordinates</h2>
+  <div class="card">
+    <table>
+      <tr><th>Parameter</th><th>Value</th></tr>
+      <tr><td>Room Shape</td><td>L-shape or U-shape</td></tr>
+      <tr><td>Width (Wall A/C span)</td><td><span class="spec-value">2.75 m</span></td></tr>
+      <tr><td>Length (Wall B span)</td><td><span class="spec-value">3.40 m</span></td></tr>
+      <tr><td>Ceiling Height</td><td><span class="spec-value">285 cm</span></td></tr>
+      <tr><td>Entrance</td><td>2.75 m wide opening on the North wall</td></tr>
+    </table>
+  </div>
+
+  <div class="room-diagram">
+<pre>
+         NORTH WALL (Entrance 2.75m wide opening)
+    ┌──────────────────────────────────────────────┐
+    │                                              │  ↕ 2.75m
+    │              OPEN KITCHEN AREA               │
+    │                                              │
+  W │  ┌─────────┐                  ┌───────────┐  │ E
+  A │  │ FRIDGE  │                  │  DRAWERS  │  │ A
+  L │  │ 80cm    │                  │  60x60    │  │ S
+  L │  │         │                  ├───────────┤  │ T
+    │  │         │   U-SHAPE        │  SHELVES  │  │
+  C │  ├─────────┤   KITCHEN        │  80x60    │  │ W
+    │  │  DISH-  │                  ├───────────┤  │ A
+    │  │ WASHER  │                  │  SHELVES  │  │ L
+    │  │  60cm   │                  │  80x60    │  │ L
+    │  ├─────────┤                  └───────────┘  │
+    │  │  SINK   │                                 │ A
+    │  │  60x60  │                                 │
+    │  ├─────────┤                                 │
+    │  │OVEN/MW  │                                 │
+    │  │TALL UNIT│                                 │
+    │  │60x60x220│                                 │
+    │  └─────────┴────────────────────────────────┐│
+    │  │ BLIND CORNER │    HOB 80x60    │ BLIND   ││
+    │  │   128x68     │   (+ CHIMNEY)   │ CORNER  ││
+    │  └──────────────┴─────────────────┴─────────┘│
+    └─────────────────┤  WINDOW 1.50m  ├───────────┘
+                      └────────────────┘
+         SOUTH WALL (Wall B – Cooking Hub)
+                    ← 3.40m →
+</pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 7. STRUCTURAL & CIVIL -->
+<!-- ============================================================ -->
+<section id="structural">
+  <h2>7. Structural &amp; Civil Measurements</h2>
+  <div class="card">
+    <table>
+      <tr><th>Structural Component</th><th>Metric (m/mm)</th><th>Imperial (ft/in)</th></tr>
+      <tr><td>Total Room Width (Wall A/C)</td><td><span class="spec-value">3.40 m</span></td><td>11' 2"</td></tr>
+      <tr><td>Total Room Depth (Wall B)</td><td><span class="spec-value">2.75 m</span></td><td>9' 0"</td></tr>
+      <tr><td>Total Floor Area (Merged)</td><td><span class="spec-value">9.35 sq m</span></td><td>100.64 sq ft</td></tr>
+      <tr><td>Ceiling Height (Floor to Slab)</td><td><span class="spec-value">2.85 m</span></td><td>9' 4"</td></tr>
+      <tr><td>Ceiling Beam Depth</td><td><span class="spec-value">0.35 m</span></td><td>1' 2"</td></tr>
+      <tr><td>Ceiling Beam Width</td><td><span class="spec-value">0.30 m</span></td><td>1' 0"</td></tr>
+      <tr><td>Window Sill Height</td><td><span class="spec-value">1.10 m</span></td><td>3' 7"</td></tr>
+      <tr><td>Window Lintel Height</td><td><span class="spec-value">2.30 m</span></td><td>7' 6.5"</td></tr>
+      <tr><td>Window Total Width</td><td><span class="spec-value">1.50 m</span></td><td>4' 11"</td></tr>
+      <tr><td>Entrance Opening Width</td><td><span class="spec-value">2.75 m</span></td><td>9' 0"</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8. CABINETRY STANDARDS -->
+<!-- ============================================================ -->
+<section id="cabinetry">
+  <h2>8. Kitchen Cabinetry &amp; Countertop Standards</h2>
+  <div class="card">
+    <table>
+      <tr><th>Cabinet Component</th><th>Metric (mm)</th><th>Imperial (inches)</th></tr>
+      <tr><td>Base Cabinet Height (Excl. Plinth)</td><td><span class="spec-value">720 mm</span></td><td>28.3"</td></tr>
+      <tr><td>Plinth / Leg Height</td><td><span class="spec-value">100 – 130 mm</span></td><td>3.9" – 5.1"</td></tr>
+      <tr><td>Total Platform Height (Top)</td><td><span class="spec-value">850 mm</span></td><td>33.5"</td></tr>
+      <tr><td>Countertop Depth (Wall A/B)</td><td><span class="spec-value">650 mm</span></td><td>25.6"</td></tr>
+      <tr><td>Countertop Thickness</td><td><span class="spec-value">20 – 40 mm</span></td><td>0.8" – 1.6"</td></tr>
+      <tr><td>Backsplash Height (Wall Tile)</td><td><span class="spec-value">600 mm</span></td><td>23.6"</td></tr>
+      <tr><td>Wall Cabinet Bottom Height</td><td><span class="spec-value">1500 mm</span></td><td>59" (4' 11")</td></tr>
+      <tr><td>Wall Cabinet Depth</td><td><span class="spec-value">350 – 370 mm</span></td><td>13.8" – 14.6"</td></tr>
+      <tr><td>Wall Cabinet Height (Horizontal)</td><td><span class="spec-value">400 – 600 mm</span></td><td>15.7" – 23.6"</td></tr>
+      <tr><td>Tall Unit Total Height</td><td><span class="spec-value">2200 mm</span></td><td>86.6" (7' 2.6")</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 9. APPLIANCE SPECS -->
+<!-- ============================================================ -->
+<section id="appliances">
+  <h2>9. Appliance Technical Specifications</h2>
+  <div class="card">
+    <table>
+      <tr><th>Appliance</th><th>Metric (W &times; D &times; H mm)</th><th>Imperial (inches)</th></tr>
+      <tr><td>Double Door Refrigerator</td><td><span class="spec-value">800 &times; 700 &times; 1750</span></td><td>31.5" &times; 27.5" &times; 69"</td></tr>
+      <tr><td>Built-in Oven (60 cm)</td><td><span class="spec-value">595 &times; 570 &times; 595</span></td><td>23.4" &times; 22.4" &times; 23.4"</td></tr>
+      <tr><td>Built-in Microwave (60 cm)</td><td><span class="spec-value">595 &times; 380 &times; 382</span></td><td>23.4" &times; 14.9" &times; 15"</td></tr>
+      <tr><td>3-Burner Built-in Hob</td><td><span class="spec-value">770 &times; 510 &times; 50</span></td><td>30.3" &times; 20.1" &times; 2"</td></tr>
+      <tr><td>Chimney (60 cm Auto-Clean)</td><td><span class="spec-value">600 &times; 480 &times; 600</span></td><td>23.6" &times; 18.9" &times; 23.6"</td></tr>
+      <tr><td>Integrated Dishwasher (60 cm)</td><td><span class="spec-value">598 &times; 570 &times; 815</span></td><td>23.5" &times; 22.4" &times; 32.1"</td></tr>
+      <tr><td>Under-mount Large Sink</td><td><span class="spec-value">610 &times; 460 &times; 230</span></td><td>24" &times; 18.1" &times; 9"</td></tr>
+      <tr><td>Water Purifier (RO)</td><td><span class="spec-value">300 &times; 250 &times; 450</span></td><td>11.8" &times; 9.8" &times; 17.7"</td></tr>
+      <tr><td>Mixer Grinder (Heavy Duty)</td><td><span class="spec-value">220 &times; 220 &times; 450</span></td><td>8.7" &times; 8.7" &times; 17.7"</td></tr>
+      <tr><td>Air Fryer (Standard)</td><td><span class="spec-value">300 &times; 300 &times; 350</span></td><td>11.8" &times; 11.8" &times; 13.8"</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10. UTENSILS & STORAGE -->
+<!-- ============================================================ -->
+<section id="utensils">
+  <h2>10. Utensil &amp; Storage Item Dimensions</h2>
+  <div class="card">
+    <table>
+      <tr><th>Storage Item</th><th>Max Diameter / Width (mm)</th><th>Height (mm)</th></tr>
+      <tr><td>Pressure Cooker (5.5 L)</td><td>280</td><td>250</td></tr>
+      <tr><td>Pressure Cooker (3.0 L)</td><td>230</td><td>200</td></tr>
+      <tr><td>Large Kadai / Wok</td><td>320</td><td>150</td></tr>
+      <tr><td>Dinner Plates (Set of 12)</td><td>270</td><td>Stack H: 100</td></tr>
+      <tr><td>Side Plates (Set of 12)</td><td>190</td><td>Stack H: 80</td></tr>
+      <tr><td>Soup Bowls (Set of 12)</td><td>110</td><td>Stack H: 200 (Nested)</td></tr>
+      <tr><td>Spice Container (Individual)</td><td>65</td><td>120</td></tr>
+      <tr><td>Rice/Dal Storage (5 kg Container)</td><td>220</td><td>350</td></tr>
+      <tr><td>Rice/Dal Storage (2 kg Container)</td><td>150</td><td>250</td></tr>
+      <tr><td>Daily Tumblers (Stack of 6)</td><td>85</td><td>300</td></tr>
+      <tr><td>Cutlery Set (Forks, Spoons, etc.)</td><td>L: 250</td><td>In 600 mm Drawer Tray</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11. MEP COORDINATES -->
+<!-- ============================================================ -->
+<section id="mep">
+  <h2>11. MEP Point Coordinates (Height from Floor)</h2>
+  <div class="card">
+    <table>
+      <tr><th>Point Description</th><th>Height (mm)</th><th>Placement Wall</th></tr>
+      <tr><td>Refrigerator Power Socket</td><td><span class="spec-value">1200</span></td><td>Wall C (Top Corner)</td></tr>
+      <tr><td>Oven Power Point</td><td><span class="spec-value">1000</span></td><td>Wall C (Inside Tall Unit)</td></tr>
+      <tr><td>Microwave Power Point</td><td><span class="spec-value">1600</span></td><td>Wall C (Inside Tall Unit)</td></tr>
+      <tr><td>Dishwasher Power &amp; Inlet</td><td><span class="spec-value">300</span></td><td>Wall C (Below Sink Area)</td></tr>
+      <tr><td>Sink Drain Point</td><td><span class="spec-value">450</span></td><td>Wall C (Center of 90 cm platform)</td></tr>
+      <tr><td>Hob / Stove Ignition Point</td><td><span class="spec-value">600</span></td><td>Wall B (Below platform)</td></tr>
+      <tr><td>Chimney Power Point</td><td><span class="spec-value">2200</span></td><td>Wall B (Behind ducting)</td></tr>
+      <tr><td>RO Purifier Power &amp; Inlet</td><td><span class="spec-value">1800</span></td><td>Wall A/B Corner</td></tr>
+      <tr><td>Mixer / Appliance Sockets (4&times;)</td><td><span class="spec-value">1050</span></td><td>Wall A (Above Countertop)</td></tr>
+      <tr><td>Under-Cabinet Profile Lights</td><td><span class="spec-value">1450</span></td><td>Wall A (Concealed)</td></tr>
+    </table>
+  </div>
+
+  <div class="warn">
+    <strong>Important:</strong> All MEP points must be confirmed against actual site conditions before rough-in. Coordinate with the electrical and plumbing contractor to verify locations within &plusmn;50 mm tolerance.
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Apartment 304 &mdash; IKEA METOD Kitchen Design Guidelines &mdash; Full Dimensional Technical Master Specification
+</footer>
+
+</body>
+</html>
