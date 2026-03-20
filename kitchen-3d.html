@@ -38,7 +38,7 @@
 <div id="hud">
   <h2>Apartment 304 &mdash; Kitchen Master Plan</h2>
   Footprint: 3.40m &times; 2.75m &times; 2.85m (100.64 sq ft)<br>
-  <span class="dim">Wall A (East) Preparation &bull; Wall B (South) Cooking &bull; Wall C (West) Utility</span>
+  <span class="dim">Wall C (West) Prep Zone &bull; Wall D (North) Cooking Hub &bull; Wall A (East) Utility &bull; Entrance: South</span>
 </div>
 
 <div id="legend">
@@ -73,7 +73,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a1a2e);
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 50);
-// Camera positioned outside Wall D (North) looking in
+// Camera positioned from South (entrance) looking toward Wall D (North/cooking)
 camera.position.set(1.7, 2.2, 5.0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -176,7 +176,7 @@ box(ROOM_L, 0.05, ROOM_W, matCeiling, ROOM_L / 2, ROOM_H + 0.025, ROOM_W / 2);
 // Wall A – East (at x = ROOM_L)
 box(WALL_T, ROOM_H, ROOM_W, matWall, ROOM_L + WALL_T / 2, ROOM_H / 2, ROOM_W / 2);
 
-// Wall B – South (at z = 0), with window cutout modeled as two pillars + lintel + sill wall
+// Wall D – North/Cooking Hub (at z = 0), with window cutout modeled as two pillars + lintel + sill wall
 const winStart = (ROOM_L - WIN_W) / 2;
 const winEnd = winStart + WIN_W;
 // Left pillar
@@ -201,72 +201,104 @@ box(0.04, WIN_HEAD - WIN_SILL, 0.05, frameMat, winEnd + 0.02, (WIN_SILL + WIN_HE
 // Wall C – West (at x = 0)
 box(WALL_T, ROOM_H, ROOM_W, matWall, -WALL_T / 2, ROOM_H / 2, ROOM_W / 2);
 
-// Wall D – North (at z = ROOM_W) — NOT rendered (camera portal)
+// South wall (at z = ROOM_W) — Entrance, NOT rendered (open entry / camera portal)
 
 // ── Perimeter Ceiling Beam ───────────────────────────────────
 const beamThick = ROOM_H - BEAM_H; // 0.35m
 // Beam along Wall A
 box(BEAM_D, beamThick, ROOM_W, matBeam, ROOM_L - BEAM_D / 2, BEAM_H + beamThick / 2, ROOM_W / 2);
-// Beam along Wall B
+// Beam along Wall D (North/Cooking)
 box(ROOM_L, beamThick, BEAM_D, matBeam, ROOM_L / 2, BEAM_H + beamThick / 2, BEAM_D / 2);
 // Beam along Wall C
 box(BEAM_D, beamThick, ROOM_W, matBeam, BEAM_D / 2, BEAM_H + beamThick / 2, ROOM_W / 2);
 
 // ═══════════════════════════════════════════════════════════════
-// WALL A – PREPARATION HUB (East Wall, full 3.40m along X)
-// Cabinetry runs along Z from 0 to ROOM_W at x ≈ ROOM_L
+// WALL A – UTILITY & APPLIANCE HUB (East Wall, x ≈ ROOM_L)
+// Layout from South/Entrance (z=ROOM_W) toward North/Wall D (z=0):
+// Fridge → Tall Unit (Oven/Micro) → Sink → Dishwasher → Corner
 // ═══════════════════════════════════════════════════════════════
 const wallA_x = ROOM_L - COUNTER_D / 2;
 const wallA_back = ROOM_L;
-
-// Base cabinets (kick + doors)
-const numBaseA = 5;
-const baseCabW = ROOM_W / numBaseA;
-for (let i = 0; i < numBaseA; i++) {
-  const z = baseCabW * i + baseCabW / 2;
-  // Toe kick
-  box(COUNTER_D - 0.08, BASE_KICK, baseCabW - 0.01, matGola, wallA_x, BASE_KICK / 2, z);
-  // Cabinet body
-  const bodyH = COUNTER_H - BASE_KICK - 0.03;
-  box(COUNTER_D, bodyH, baseCabW - 0.008, matCabinet, wallA_x, BASE_KICK + bodyH / 2, z);
-  // GOLA profile line
-  box(COUNTER_D - 0.04, 0.012, baseCabW - 0.02, matGola, wallA_x, COUNTER_H - 0.04, z);
-}
-
-// Countertop (Wall A)
-box(COUNTER_D + 0.02, 0.03, ROOM_W, matQuartz, wallA_x, COUNTER_H + 0.015, ROOM_W / 2);
-
-// Upper cabinets (Wall A)
 const upperH = UPPER_TOP - UPPER_BOT;
-const numUpperA = 5;
-const upperCabW = ROOM_W / numUpperA;
-for (let i = 0; i < numUpperA; i++) {
-  const z = upperCabW * i + upperCabW / 2;
-  box(0.35, upperH, upperCabW - 0.008, matCabinet, ROOM_L - 0.175, UPPER_BOT + upperH / 2, z);
-  // GOLA profile
-  box(0.30, 0.012, upperCabW - 0.02, matGola, ROOM_L - 0.175, UPPER_BOT + 0.01, z);
-}
 
-// Under-cabinet LED strip (Wall A)
-box(0.02, 0.008, ROOM_W - 0.10, matLED, ROOM_L - 0.36, UPPER_BOT - 0.01, ROOM_W / 2);
+// ── Fridge (80cm wide, 70cm deep) at South end near entrance ──
+const fridgeW_A = 0.80, fridgeD_A = 0.70, fridgeH_A = 1.75;
+const fridgeZ_A = ROOM_W - fridgeW_A / 2 - 0.05;
+box(fridgeD_A, fridgeH_A, fridgeW_A, matAppliance, ROOM_L - fridgeD_A / 2, fridgeH_A / 2, fridgeZ_A);
+// Fridge doors split line
+box(0.01, fridgeH_A - 0.10, 0.01, matStainless, ROOM_L - fridgeD_A - 0.005, fridgeH_A / 2, fridgeZ_A);
+// Fridge handles
+box(0.02, 0.30, 0.03, matStainless, ROOM_L - fridgeD_A - 0.01, fridgeH_A * 0.6, fridgeZ_A + 0.15);
+box(0.02, 0.30, 0.03, matStainless, ROOM_L - fridgeD_A - 0.01, fridgeH_A * 0.6, fridgeZ_A - 0.15);
 
-// Built-in Microwave (Wall A) – placed in 2nd upper cabinet slot
-const microX = ROOM_L - 0.175;
-const microZ = upperCabW * 1 + upperCabW / 2;
-box(0.40, 0.30, 0.52, matAppliance, microX, UPPER_BOT + 0.55, microZ);
+// ── Tall Unit: Oven + Microwave (60cm) beside Fridge ──
+const tallZ = fridgeZ_A - fridgeW_A / 2 - 0.30; // center of 60cm tall unit
+const tallH = 2.20;
+box(0.60, tallH, 0.60, matCabinet, ROOM_L - 0.30, tallH / 2, tallZ);
+// Oven (inside tall unit, lower section)
+box(0.56, 0.56, 0.54, matAppliance, ROOM_L - 0.30, 0.70, tallZ);
+// Oven door glass
+box(0.01, 0.48, 0.48, matBlackGlass, ROOM_L - 0.60 - 0.005, 0.70, tallZ);
+// Microwave (above oven)
+box(0.56, 0.36, 0.38, matAppliance, ROOM_L - 0.30, 1.40, tallZ);
 // Microwave door glass
-box(0.01, 0.24, 0.44, matBlackGlass, microX - 0.20, UPPER_BOT + 0.55, microZ);
+box(0.01, 0.28, 0.32, matBlackGlass, ROOM_L - 0.60 - 0.005, 1.40, tallZ);
 
-// Water Purifier (RO) – under sink area, modeled on Wall A far end
-box(0.30, 0.45, 0.20, matAppliance, ROOM_L - 0.30, BASE_KICK + 0.225, ROOM_W - 0.30);
+// ── Sink (60cm) ──
+const sinkZ_A = tallZ - 0.30 - 0.30; // center of 60cm sink unit
+// Sink base cabinet
+const bodyH_A = COUNTER_H - BASE_KICK - 0.03;
+box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallA_x, BASE_KICK / 2, sinkZ_A);
+box(COUNTER_D, bodyH_A, 0.59, matCabinet, wallA_x, BASE_KICK + bodyH_A / 2, sinkZ_A);
+box(COUNTER_D - 0.04, 0.012, 0.58, matGola, wallA_x, COUNTER_H - 0.04, sinkZ_A);
+// Sink basin
+const sinkBasinA = new THREE.Mesh(
+  new THREE.BoxGeometry(0.46, 0.18, 0.50),
+  matStainless
+);
+sinkBasinA.position.set(wallA_x, COUNTER_H - 0.06, sinkZ_A);
+scene.add(sinkBasinA);
+// Faucet
+const faucetA = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.015, 0.02, 0.30, 12),
+  matStainless
+);
+faucetA.position.set(wallA_x - 0.10, COUNTER_H + 0.15, sinkZ_A);
+scene.add(faucetA);
+
+// ── Dishwasher (60cm) ──
+const dwZ_A = sinkZ_A - 0.60;
+box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallA_x, BASE_KICK / 2, dwZ_A);
+box(COUNTER_D, bodyH_A, 0.59, matCabinet, wallA_x, BASE_KICK + bodyH_A / 2, dwZ_A);
+// Dishwasher front panel
+box(0.02, bodyH_A - 0.05, 0.56, matAppliance, ROOM_L - COUNTER_D - 0.01, BASE_KICK + bodyH_A / 2, dwZ_A);
+// Dishwasher handle
+box(0.02, 0.02, 0.50, matStainless, ROOM_L - COUNTER_D - 0.02, COUNTER_H * 0.92, dwZ_A);
+
+// Countertop Wall A (sink + dishwasher area)
+const ctrA_len = (sinkZ_A + 0.30) - (dwZ_A - 0.30);
+const ctrA_center = (sinkZ_A + dwZ_A) / 2;
+box(COUNTER_D + 0.02, 0.03, ctrA_len, matQuartz, wallA_x, COUNTER_H + 0.015, ctrA_center);
+
+// Upper cabinets (Wall A – above sink and dishwasher)
+box(0.35, upperH, 0.59, matCabinet, ROOM_L - 0.175, UPPER_BOT + upperH / 2, sinkZ_A);
+box(0.30, 0.012, 0.58, matGola, ROOM_L - 0.175, UPPER_BOT + 0.01, sinkZ_A);
+box(0.35, upperH, 0.59, matCabinet, ROOM_L - 0.175, UPPER_BOT + upperH / 2, dwZ_A);
+box(0.30, 0.012, 0.58, matGola, ROOM_L - 0.175, UPPER_BOT + 0.01, dwZ_A);
+
+// Under-cabinet LED strip (Wall A – above sink/dishwasher)
+box(0.02, 0.008, ctrA_len - 0.10, matLED, ROOM_L - 0.36, UPPER_BOT - 0.01, ctrA_center);
+
+// Water Purifier (RO) – under sink
+box(0.30, 0.45, 0.20, matAppliance, ROOM_L - 0.30, BASE_KICK + 0.225, sinkZ_A + 0.15);
 
 // ═══════════════════════════════════════════════════════════════
-// WALL B – COOKING HUB (South Wall, 2.75m along Z at z ≈ 0)
+// WALL D – COOKING HUB (North Wall, at z ≈ 0)
 // Cabinetry along X-axis near z = 0
 // ═══════════════════════════════════════════════════════════════
 const wallB_z = COUNTER_D / 2;
 
-// Base cabinets (Wall B) – 3 units flanking the hob
+// Base cabinets (Wall D) – units flanking the hob
 const numBaseB = 4;
 const baseBW = ROOM_L / numBaseB;
 for (let i = 0; i < numBaseB; i++) {
@@ -280,10 +312,10 @@ for (let i = 0; i < numBaseB; i++) {
   box(baseBW - 0.02, 0.012, COUNTER_D - 0.04, matGola, x, COUNTER_H - 0.04, wallB_z);
 }
 
-// Countertop (Wall B)
+// Countertop (Wall D)
 box(ROOM_L, 0.03, COUNTER_D + 0.02, matQuartz, ROOM_L / 2, COUNTER_H + 0.015, wallB_z);
 
-// 3-Burner Gas Hob – centered on Wall B, aligned with window
+// 3-Burner Gas Hob – centered on Wall D, aligned with window
 const hobX = ROOM_L / 2;
 const hobZ = COUNTER_D / 2;
 box(0.77, 0.025, 0.51, matBlackGlass, hobX, COUNTER_H + 0.04, hobZ);
@@ -321,90 +353,53 @@ box(0.30, WIN_HEAD - WIN_SILL - 0.10, 0.25, matStainless, hobX, (WIN_SILL + 0.20
 box(0.25, 0.25, 0.08, matAppliance, winEnd - 0.20, WIN_HEAD - 0.20, -WALL_T / 2 + 0.04);
 
 // ═══════════════════════════════════════════════════════════════
-// WALL C – UTILITY HUB (West Wall, along Z at x ≈ 0)
-// North end: Fridge → 1.20m gap → Dishwasher → Sink
+// WALL C – PREPARATION ZONE (West Wall, along Z at x ≈ 0)
+// Layout: 1× Drawers 60cm + 2× Shelf cabinets 80cm + 3× Wall cabs 80cm
 // ═══════════════════════════════════════════════════════════════
 
-// Double Door Refrigerator – at North end of Wall C (high Z)
-const fridgeW = 0.80, fridgeD = 0.70, fridgeH = 1.75;
-const fridgeX = fridgeD / 2;
-const fridgeZ = ROOM_W - fridgeW / 2 - 0.05;
-box(fridgeD, fridgeH, fridgeW, matAppliance, fridgeX, fridgeH / 2, fridgeZ);
-// Fridge doors split line
-box(0.01, fridgeH - 0.10, 0.01, matStainless, fridgeD + 0.005, fridgeH / 2, fridgeZ);
-// Fridge handles
-box(0.02, 0.30, 0.03, matStainless, fridgeD + 0.01, fridgeH * 0.6, fridgeZ + 0.15);
-box(0.02, 0.30, 0.03, matStainless, fridgeD + 0.01, fridgeH * 0.6, fridgeZ - 0.15);
+const wallC_x = COUNTER_D / 2;
+const bodyH_C = COUNTER_H - BASE_KICK - 0.03;
 
-// ── 1.20m BIM Clearance Gap ─────────────────────────────────
-// Gap from fridgeZ - fridgeW/2 - 0.05 going south for 1.20m
-const gapStart = fridgeZ - fridgeW / 2 - 0.05;
-const gapEnd = gapStart - 1.20;
+// Base cabinet 1: Drawers 60cm (nearest entrance / high z)
+const wc_draw_z = ROOM_W - 0.30;
+box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallC_x, BASE_KICK / 2, wc_draw_z);
+box(COUNTER_D, bodyH_C, 0.59, matCabinet, wallC_x, BASE_KICK + bodyH_C / 2, wc_draw_z);
+box(COUNTER_D - 0.04, 0.012, 0.58, matGola, wallC_x, COUNTER_H - 0.04, wc_draw_z);
 
-// Dishwasher – 0.60m integrated, south of gap
-const dwW = 0.60, dwD = 0.60, dwH = 0.82;
-const dwZ = gapEnd - dwW / 2;
-// Base cabinet surround for dishwasher
-box(COUNTER_D, COUNTER_H - 0.03, dwW + 0.04, matCabinet, COUNTER_D / 2, (COUNTER_H - 0.03) / 2, dwZ);
-// Dishwasher front panel
-box(0.02, dwH - 0.05, dwW - 0.02, matAppliance, COUNTER_D + 0.01, dwH / 2, dwZ);
-// Dishwasher handle
-box(0.02, 0.02, dwW - 0.10, matStainless, COUNTER_D + 0.02, dwH * 0.92, dwZ);
+// Base cabinet 2: Shelves 80cm
+const wc_shelf1_z = ROOM_W - 0.60 - 0.40;
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, wc_shelf1_z);
+box(COUNTER_D, bodyH_C, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH_C / 2, wc_shelf1_z);
+box(COUNTER_D - 0.04, 0.012, 0.78, matGola, wallC_x, COUNTER_H - 0.04, wc_shelf1_z);
 
-// Sink unit – south of dishwasher
-const sinkW = 0.61, sinkD = 0.46;
-const sinkZ = dwZ - dwW / 2 - sinkW / 2 - 0.05;
-// Sink base cabinet
-box(COUNTER_D, COUNTER_H - 0.03, sinkW + 0.10, matCabinet, COUNTER_D / 2, (COUNTER_H - 0.03) / 2, sinkZ);
-// GOLA profile
-box(COUNTER_D - 0.04, 0.012, sinkW + 0.08, matGola, COUNTER_D / 2, COUNTER_H - 0.04, sinkZ);
+// Base cabinet 3: Shelves 80cm
+const wc_shelf2_z = ROOM_W - 0.60 - 0.80 - 0.40;
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, wc_shelf2_z);
+box(COUNTER_D, bodyH_C, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH_C / 2, wc_shelf2_z);
+box(COUNTER_D - 0.04, 0.012, 0.78, matGola, wallC_x, COUNTER_H - 0.04, wc_shelf2_z);
 
-// Countertop for Wall C (dishwasher + sink section)
-const counterC_len = dwW + sinkW + 0.20;
-const counterC_z = (dwZ + sinkZ) / 2;
-box(COUNTER_D + 0.02, 0.03, counterC_len, matQuartz, COUNTER_D / 2, COUNTER_H + 0.015, counterC_z);
+// Countertop Wall C (full run: 60+80+80 = 220cm)
+const counterC_len = 2.20;
+const counterC_z = ROOM_W - counterC_len / 2;
+box(COUNTER_D + 0.02, 0.03, counterC_len, matQuartz, wallC_x, COUNTER_H + 0.015, counterC_z);
 
-// Sink basin (recessed into countertop)
-const sinkBasin = new THREE.Mesh(
-  new THREE.BoxGeometry(sinkD, 0.18, sinkW),
-  matStainless
-);
-sinkBasin.position.set(COUNTER_D / 2, COUNTER_H - 0.06, sinkZ);
-scene.add(sinkBasin);
-
-// Faucet
-const faucetBase = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.015, 0.02, 0.30, 12),
-  matStainless
-);
-faucetBase.position.set(COUNTER_D / 2 + 0.10, COUNTER_H + 0.15, sinkZ);
-scene.add(faucetBase);
-// Faucet spout
-const spout = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.01, 0.01, 0.15, 8),
-  matStainless
-);
-spout.rotation.z = Math.PI / 2;
-spout.position.set(COUNTER_D / 2 + 0.03, COUNTER_H + 0.30, sinkZ);
-scene.add(spout);
-
-// Upper cabinets for Wall C (above dishwasher/sink area)
-const upperC_count = 2;
-const upperC_w = counterC_len / upperC_count;
-for (let i = 0; i < upperC_count; i++) {
-  const z = counterC_z - counterC_len / 2 + upperC_w * i + upperC_w / 2;
-  box(0.35, upperH, upperC_w - 0.008, matCabinet, 0.175, UPPER_BOT + upperH / 2, z);
-  box(0.30, 0.012, upperC_w - 0.02, matGola, 0.175, UPPER_BOT + 0.01, z);
+// Wall cabinets Wall C: 3× horizontal 80cm
+for (let i = 0; i < 3; i++) {
+  const z = ROOM_W - 0.40 - (0.80 * i);
+  box(0.35, upperH, 0.79, matCabinet, 0.175, UPPER_BOT + upperH / 2, z);
+  box(0.30, 0.012, 0.78, matGola, 0.175, UPPER_BOT + 0.01, z);
 }
 
 // Under-cabinet LED strip (Wall C)
 box(0.02, 0.008, counterC_len - 0.10, matLED, 0.36, UPPER_BOT - 0.01, counterC_z);
 
 // ═══════════════════════════════════════════════════════════════
-// Corner Integration – Wall A / Wall B junction countertop
+// Corner Integration – Wall A / Wall D and Wall C / Wall D junctions
 // ═══════════════════════════════════════════════════════════════
-// Small filler piece at the corner where Wall A meets Wall B
+// Small filler piece at the corner where Wall A meets Wall D
 box(COUNTER_D, 0.03, COUNTER_D, matQuartz, wallA_x, COUNTER_H + 0.015, wallB_z);
+// Small filler piece at the corner where Wall C meets Wall D
+box(COUNTER_D, 0.03, COUNTER_D, matQuartz, wallC_x, COUNTER_H + 0.015, wallB_z);
 
 // ═══════════════════════════════════════════════════════════════
 // LIGHTING
@@ -451,7 +446,7 @@ sunLight.shadow.camera.bottom = -1;
 scene.add(sunLight);
 scene.add(sunLight.target);
 
-// Subtle fill from open Wall D (north)
+// Subtle fill from South entrance (open wall)
 const fillLight = new THREE.DirectionalLight(0xe8eeff, 0.3);
 fillLight.position.set(ROOM_L / 2, 2, ROOM_W + 3);
 scene.add(fillLight);
@@ -472,8 +467,8 @@ function addDimensionLine(start, end, color = 0xff6644) {
 addDimensionLine([0, 0.01, ROOM_W + 0.15], [ROOM_L, 0.01, ROOM_W + 0.15]);
 // Room width (Z)
 addDimensionLine([-0.15, 0.01, 0], [-0.15, 0.01, ROOM_W]);
-// BIM Clearance gap on Wall C
-addDimensionLine([-0.25, 0.01, gapEnd], [-0.25, 0.01, gapStart], 0x44aaff);
+// Wall C prep zone extent
+addDimensionLine([-0.25, 0.01, ROOM_W - counterC_len], [-0.25, 0.01, ROOM_W], 0x44aaff);
 
 // ═══════════════════════════════════════════════════════════════
 // RENDER LOOP
