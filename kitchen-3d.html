@@ -36,16 +36,17 @@
 <body>
 
 <div id="hud">
-  <h2>Apartment 304 &mdash; Kitchen Master Plan</h2>
+  <h2>Apartment 304 &mdash; Kitchen V3 (IKEA Planner)</h2>
   Footprint: 2.75m (W) &times; 3.40m (D) &times; 2.85m (H) = 9.35 sq m<br>
-  <span class="dim">Wall C (Left) Cooking+Prep &bull; Back Wall (Top) L-Counter &bull; Wall A (Right) Utility &bull; Wall D (South) Entrance</span>
+  <span class="dim">Wall C (Left) Cooking+Prep &bull; Back Wall (Top) L-Counter &bull; Wall A (Right) Sink+Dishwasher+Utility &bull; Wall D (South) Entrance</span>
 </div>
 
 <div id="legend">
   <div><span style="background:#e8e8e8"></span>Arctic White Gloss Cabinetry</div>
   <div><span style="background:#f5f0eb"></span>White Quartz Countertop</div>
   <div><span style="background:#2a2a2a"></span>Appliances (Hob / Fridge / Dishwasher)</div>
-  <div><span style="background:#b0b0b0"></span>Stainless Steel (Sink / Hood)</div>
+  <div><span style="background:#1a1a1a"></span>KILSVIKEN Black Quartz Sink</div>
+  <div><span style="background:#b0b0b0"></span>Stainless Steel (Tap / Handles)</div>
   <div><span style="background:#87CEEB"></span>Window Glazing</div>
 </div>
 
@@ -103,8 +104,8 @@ const BEAM_D = 0.35;   // Beam depth (hangs from ceiling)
 const COUNTER_D = 0.65;// Countertop depth
 const COUNTER_H = 0.87;// Standard counter height
 const BASE_KICK = 0.10;// Toe kick height
-const UPPER_BOT = 1.40;// Upper cabinet bottom edge
-const UPPER_TOP = BEAM_H;// Upper cabinet top = beam soffit
+const UPPER_BOT = 1.50;// Upper cabinet bottom edge (V3)
+const UPPER_TOP = 2.30; // Upper cabinet top = 1.50 + 0.80 (V3: 80cm tall wall cabs)
 const WIN_W = 1.50;    // Window width
 const WIN_SILL = 1.10; // Window sill height
 const WIN_HEAD = 2.20;  // Window head height
@@ -154,6 +155,7 @@ const matGlass = new THREE.MeshPhysicalMaterial({
 });
 const matLED = new THREE.MeshBasicMaterial({ color: 0xfff5e6 });
 const matGola = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.3, metalness: 0.7 });
+const matBlackQuartz = new THREE.MeshPhysicalMaterial({ color: 0x1a1a1a, roughness: 0.15, metalness: 0.05, clearcoat: 0.5 });
 
 // ── Helper Functions ─────────────────────────────────────────
 function box(w, h, d, mat, x, y, z) {
@@ -214,130 +216,131 @@ box(BEAM_D, beamThick, ROOM_W, matBeam, BEAM_D / 2, BEAM_H + beamThick / 2, ROOM
 
 // ═══════════════════════════════════════════════════════════════
 // WALL C – COOKING & PREP ZONE (Left Wall, x ≈ 0)
-// Layout along Z from z=0 (back) to z=ROOM_W (entrance):
-// Corner → Hob 80 → Shelf 80 → Shelf 80 → Drawers 60
+// V3 Layout: Corner carousel → 3x 80cm drawers → 20cm pull-out
 // ═══════════════════════════════════════════════════════════════
 const wallC_x = COUNTER_D / 2;
-const upperH = UPPER_TOP - UPPER_BOT;
+const upperH = UPPER_TOP - UPPER_BOT; // 0.80m (V3)
 const bodyH = COUNTER_H - BASE_KICK - 0.03;
 
-// Corner connecting to back wall
-box(COUNTER_D, bodyH, COUNTER_D, matCabinet, wallC_x, BASE_KICK + bodyH / 2, COUNTER_D / 2);
+// Corner carousel base (ME 190, 88cm along Wall C, z=0 to z=0.80)
+box(COUNTER_D, bodyH, 0.80, matCabinet, wallC_x, BASE_KICK + bodyH / 2, 0.40);
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, 0.40);
 
-// Hob base cabinet (80cm) – gas stove
-const hobZ = COUNTER_D + 0.40;
-box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, hobZ);
-box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, hobZ);
-// 3-Burner Gas Hob (no chimney)
-box(0.60, 0.025, 0.70, matBlackGlass, wallC_x, COUNTER_H + 0.04, hobZ);
+// 80cm drawer base #1 (ME 158, z=0.80 to z=1.60) – LAGAN 60cm gas hob on top
+const drawer1Z = 1.20;
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, drawer1Z);
+box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, drawer1Z);
+// LAGAN gas hob 60cm (no chimney)
+box(0.50, 0.025, 0.55, matBlackGlass, wallC_x, COUNTER_H + 0.04, drawer1Z);
 const burnerMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.3, metalness: 0.8 });
-[[wallC_x - 0.12, hobZ - 0.15], [wallC_x + 0.12, hobZ - 0.15], [wallC_x, hobZ + 0.12]].forEach(([bx, bz]) => {
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.007, 8, 24), burnerMat);
+[[wallC_x - 0.10, drawer1Z - 0.12], [wallC_x + 0.10, drawer1Z - 0.12],
+ [wallC_x - 0.10, drawer1Z + 0.12], [wallC_x + 0.10, drawer1Z + 0.12]].forEach(([bx, bz]) => {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.006, 8, 24), burnerMat);
   ring.rotation.x = -Math.PI / 2;
   ring.position.set(bx, COUNTER_H + 0.06, bz);
   scene.add(ring);
 });
 
-// Shelf 80cm
-const shelf1Z = COUNTER_D + 0.80 + 0.40;
-box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, shelf1Z);
-box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, shelf1Z);
+// 80cm drawer base #2 (ME 158, z=1.60 to z=2.40)
+const drawer2Z = 2.00;
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, drawer2Z);
+box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, drawer2Z);
 
-// Shelf 80cm
-const shelf2Z = COUNTER_D + 1.60 + 0.40;
-box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, shelf2Z);
-box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, shelf2Z);
+// 80cm drawer base #3 (ME 158, z=2.40 to z=3.20)
+const drawer3Z = 2.80;
+box(COUNTER_D - 0.08, BASE_KICK, 0.79, matGola, wallC_x, BASE_KICK / 2, drawer3Z);
+box(COUNTER_D, bodyH, 0.79, matCabinet, wallC_x, BASE_KICK + bodyH / 2, drawer3Z);
 
-// Drawers 60cm (nearest entrance)
-const drawZ = COUNTER_D + 2.40 + 0.30;
-box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallC_x, BASE_KICK / 2, drawZ);
-box(COUNTER_D, bodyH, 0.59, matCabinet, wallC_x, BASE_KICK + bodyH / 2, drawZ);
+// 20cm pull-out (ME 218, z=3.20 to z=3.40)
+const pulloutZ = 3.30;
+box(COUNTER_D - 0.08, BASE_KICK, 0.19, matGola, wallC_x, BASE_KICK / 2, pulloutZ);
+box(COUNTER_D, bodyH, 0.19, matCabinet, wallC_x, BASE_KICK + bodyH / 2, pulloutZ);
 
-// Countertop Wall C (full run)
-box(COUNTER_D + 0.02, 0.03, 2.75, matQuartz, wallC_x, COUNTER_H + 0.015, COUNTER_D + 2.75 / 2);
+// Countertop Wall C (z=0.80 to z=3.40)
+box(COUNTER_D + 0.02, 0.03, 2.60, matQuartz, wallC_x, COUNTER_H + 0.015, 0.80 + 2.60 / 2);
 
-// Wall cabinets Wall C: 3x 80cm
+// Wall cabinets Wall C: corner + 3x 80cm (all 80cm TALL, V3)
+// Corner wall cab (ME 3002, z=0 to z=0.80)
+box(0.37, upperH, 0.79, matCabinet, 0.185, UPPER_BOT + upperH / 2, 0.40);
+box(0.02, 0.008, 0.78, matLED, 0.37, UPPER_BOT - 0.01, 0.40);
+// 3x ME 310 wall cabs (80cm each, z=0.80 to z=3.20)
 for (let i = 0; i < 3; i++) {
-  const z = COUNTER_D + 0.40 + i * 0.80;
-  box(0.35, upperH, 0.79, matCabinet, 0.175, UPPER_BOT + upperH / 2, z);
+  const z = 0.80 + 0.40 + i * 0.80;
+  box(0.37, upperH, 0.79, matCabinet, 0.185, UPPER_BOT + upperH / 2, z);
   box(0.30, 0.012, 0.78, matGola, 0.175, UPPER_BOT + 0.01, z);
+  // MITTLED LED strip under each
+  box(0.02, 0.008, 0.78, matLED, 0.37, UPPER_BOT - 0.01, z);
 }
-
-// Under-cabinet LED strip (Wall C)
-box(0.02, 0.008, 2.40, matLED, 0.36, UPPER_BOT - 0.01, COUNTER_D + 1.20);
 
 // ═══════════════════════════════════════════════════════════════
 // WALL A – UTILITY HUB (Right Wall, x ≈ ROOM_L)
-// Layout along Z from z=0 (back) to z=ROOM_W (entrance):
-// Corner → Sink → Open Space → Fridge → Oven+Appliance
+// V3 Layout: Corner Sink 128cm → Dishwasher 60cm → Open → Fridge → Tall Oven/Micro 200cm
 // ═══════════════════════════════════════════════════════════════
 const wallA_x = ROOM_L - COUNTER_D / 2;
 
-// Corner connecting to back wall
-box(COUNTER_D, bodyH, COUNTER_D, matCabinet, wallA_x, BASE_KICK + bodyH / 2, COUNTER_D / 2);
-
-// Sink base (60cm)
-const sinkZ = COUNTER_D + 0.30;
-box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallA_x, BASE_KICK / 2, sinkZ);
-box(COUNTER_D, bodyH, 0.59, matCabinet, wallA_x, BASE_KICK + bodyH / 2, sinkZ);
-// Sink basin
-const sinkBasin = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.18, 0.50), matStainless);
-sinkBasin.position.set(wallA_x, COUNTER_H - 0.06, sinkZ);
-scene.add(sinkBasin);
-// Faucet
+// Corner sink cabinet (ME 1880, 128cm, z=0 to z≈0.675 along Wall A)
+box(COUNTER_D, bodyH, 0.675, matCabinet, wallA_x, BASE_KICK + bodyH / 2, 0.675 / 2);
+box(COUNTER_D - 0.08, BASE_KICK, 0.67, matGola, wallA_x, BASE_KICK / 2, 0.675 / 2);
+// KILSVIKEN black quartz inset sink (56×46cm)
+const sinkZ = 0.34;
+box(0.46, 0.16, 0.42, matBlackQuartz, wallA_x, COUNTER_H - 0.04, sinkZ);
+// ÄLMAREN mixer tap
 const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.30, 12), matStainless);
-faucet.position.set(wallA_x + 0.10, COUNTER_H + 0.15, sinkZ);
+faucet.position.set(wallA_x + 0.10, COUNTER_H + 0.15, sinkZ - 0.15);
 scene.add(faucet);
+// HÅLLBAR waste sorting under sink
+box(0.25, 0.35, 0.20, matAppliance, ROOM_L - 0.30, BASE_KICK + 0.175, 0.35);
 
-// Countertop Wall A (corner + sink area)
-box(COUNTER_D + 0.02, 0.03, 1.10, matQuartz, wallA_x, COUNTER_H + 0.015, 0.55);
+// Integrated dishwasher (ME 1002, LAGAN, 60cm, z=0.675 to z=1.275)
+const dwZ = 0.975;
+box(COUNTER_D - 0.08, BASE_KICK, 0.59, matGola, wallA_x, BASE_KICK / 2, dwZ);
+box(COUNTER_D, bodyH, 0.59, matCabinet, wallA_x, BASE_KICK + bodyH / 2, dwZ);
+// Dishwasher front indicator (dark panel)
+box(0.01, bodyH - 0.04, 0.55, matAppliance, ROOM_L - 0.005, BASE_KICK + bodyH / 2, dwZ);
 
-// Upper cabinets (Wall A – above sink)
-box(0.35, upperH, 0.59, matCabinet, ROOM_L - 0.175, UPPER_BOT + upperH / 2, sinkZ);
-box(0.30, 0.012, 0.58, matGola, ROOM_L - 0.175, UPPER_BOT + 0.01, sinkZ);
-// Under-cabinet LED
-box(0.02, 0.008, 0.55, matLED, ROOM_L - 0.36, UPPER_BOT - 0.01, sinkZ);
+// Countertop Wall A (corner sink + dishwasher area, z=0 to z=1.275)
+box(COUNTER_D + 0.02, 0.03, 1.275, matQuartz, wallA_x, COUNTER_H + 0.015, 1.275 / 2);
 
-// Water Purifier (RO) under sink
-box(0.30, 0.45, 0.20, matAppliance, ROOM_L - 0.30, BASE_KICK + 0.225, sinkZ + 0.15);
+// Wall cabinet Wall A: ME 335 (30cm wide, 80cm tall) above sink area
+box(0.37, upperH, 0.29, matCabinet, ROOM_L - 0.185, UPPER_BOT + upperH / 2, 0.34);
+box(0.02, 0.008, 0.28, matLED, ROOM_L - 0.37, UPPER_BOT - 0.01, 0.34);
 
-// -- Open space: z ≈ 1.10 to 2.00 (nothing here) --
+// -- Open space: z ≈ 1.275 to 1.812 (nothing here) --
 
-// Fridge (80cm along wall, 70cm deep)
-const fridgeZ = 2.00;
-box(0.70, 1.75, 0.80, matAppliance, ROOM_L - 0.35, 1.75 / 2, fridgeZ + 0.40);
+// Fridge (freestanding, ~780mm wide, z=1.812 to z=2.592)
+const fridgeZ = 2.202;
+box(0.70, 1.75, 0.78, matAppliance, ROOM_L - 0.35, 1.75 / 2, fridgeZ);
 // Fridge doors split line
-box(0.01, 1.65, 0.01, matStainless, ROOM_L - 0.70 - 0.005, 1.75 / 2, fridgeZ + 0.40);
+box(0.01, 1.65, 0.01, matStainless, ROOM_L - 0.70 - 0.005, 1.75 / 2, fridgeZ);
 // Fridge handles
-box(0.02, 0.30, 0.03, matStainless, ROOM_L - 0.70 - 0.01, 1.05, fridgeZ + 0.55);
-box(0.02, 0.30, 0.03, matStainless, ROOM_L - 0.70 - 0.01, 1.05, fridgeZ + 0.25);
+box(0.02, 0.30, 0.03, matStainless, ROOM_L - 0.70 - 0.01, 1.05, fridgeZ + 0.15);
+box(0.02, 0.30, 0.03, matStainless, ROOM_L - 0.70 - 0.01, 1.05, fridgeZ - 0.15);
 
-// Oven + Appliance Tall Unit (60cm, near entrance)
-const tallZ = 2.80;
-const tallH = 2.20;
-box(0.60, tallH, 0.60, matCabinet, ROOM_L - 0.30, tallH / 2, tallZ + 0.30);
+// Oven + Micro Tall Unit (ME 742, 60×60×200cm, z=2.592 to z=3.192)
+const tallZ = 2.892;
+const tallH = 2.00; // V3: 200cm (was 220cm)
+box(0.60, tallH, 0.60, matCabinet, ROOM_L - 0.30, tallH / 2, tallZ);
 // Oven (lower)
-box(0.56, 0.56, 0.54, matAppliance, ROOM_L - 0.30, 0.70, tallZ + 0.30);
-box(0.01, 0.48, 0.48, matBlackGlass, ROOM_L - 0.60 - 0.005, 0.70, tallZ + 0.30);
+box(0.56, 0.56, 0.54, matAppliance, ROOM_L - 0.30, 0.70, tallZ);
+box(0.01, 0.48, 0.48, matBlackGlass, ROOM_L - 0.60 - 0.005, 0.70, tallZ);
 // Microwave (upper)
-box(0.56, 0.36, 0.38, matAppliance, ROOM_L - 0.30, 1.40, tallZ + 0.30);
-box(0.01, 0.28, 0.32, matBlackGlass, ROOM_L - 0.60 - 0.005, 1.40, tallZ + 0.30);
+box(0.56, 0.36, 0.38, matAppliance, ROOM_L - 0.30, 1.40, tallZ);
+box(0.01, 0.28, 0.32, matBlackGlass, ROOM_L - 0.60 - 0.005, 1.40, tallZ);
 
 // ═══════════════════════════════════════════════════════════════
 // BACK WALL – L-CORNER COUNTER (at z ≈ 0)
-// Connects Wall C to Wall A with base cabinets and countertop
+// V3: Corner(WallC) → ME219 30cm pull-out → ME157 60cm drawers → filler → Corner(WallA sink)
 // ═══════════════════════════════════════════════════════════════
 const backW_z = COUNTER_D / 2;
 
-// Base cabinets along back wall (between corners)
-const numBaseBack = 3;
-const baseBW = (ROOM_L - 2 * COUNTER_D) / numBaseBack;
-for (let i = 0; i < numBaseBack; i++) {
-  const x = COUNTER_D + baseBW * i + baseBW / 2;
-  box(baseBW - 0.01, BASE_KICK, COUNTER_D - 0.08, matGola, x, BASE_KICK / 2, backW_z);
-  box(baseBW - 0.008, bodyH, COUNTER_D, matCabinet, x, BASE_KICK + bodyH / 2, backW_z);
-  box(baseBW - 0.02, 0.012, COUNTER_D - 0.04, matGola, x, COUNTER_H - 0.04, backW_z);
-}
+// ME 219: 30cm pull-out (x=0.65 to x=0.95)
+box(0.29, BASE_KICK, COUNTER_D - 0.08, matGola, 0.80, BASE_KICK / 2, backW_z);
+box(0.29, bodyH, COUNTER_D, matCabinet, 0.80, BASE_KICK + bodyH / 2, backW_z);
+// ME 157: 60cm drawers (x=0.95 to x=1.55)
+box(0.59, BASE_KICK, COUNTER_D - 0.08, matGola, 1.25, BASE_KICK / 2, backW_z);
+box(0.59, bodyH, COUNTER_D, matCabinet, 1.25, BASE_KICK + bodyH / 2, backW_z);
+// Filler + corner sink cab extends along back wall (x=1.55 to x=2.10)
+box(0.54, bodyH, COUNTER_D, matCabinet, 1.82, BASE_KICK + bodyH / 2, backW_z);
 
 // Countertop (back wall, full width)
 box(ROOM_L, 0.03, COUNTER_D + 0.02, matQuartz, ROOM_L / 2, COUNTER_H + 0.015, backW_z);
@@ -418,8 +421,10 @@ function addDimensionLine(start, end, color = 0xff6644) {
 addDimensionLine([0, 0.01, ROOM_W + 0.15], [ROOM_L, 0.01, ROOM_W + 0.15]);
 // Room width (Z)
 addDimensionLine([-0.15, 0.01, 0], [-0.15, 0.01, ROOM_W]);
-// Wall C cooking+prep zone extent
-addDimensionLine([-0.25, 0.01, COUNTER_D], [-0.25, 0.01, COUNTER_D + 3.00], 0x44aaff);
+// Wall C cooking+prep zone extent (V3: 0.80 to 3.40)
+addDimensionLine([-0.25, 0.01, 0.80], [-0.25, 0.01, 3.40], 0x44aaff);
+// Wall A sink+dishwasher zone
+addDimensionLine([ROOM_L + 0.15, 0.01, 0], [ROOM_L + 0.15, 0.01, 1.275], 0x44aaff);
 
 // ═══════════════════════════════════════════════════════════════
 // RENDER LOOP
