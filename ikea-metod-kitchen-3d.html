@@ -307,77 +307,140 @@ function drawWalls() {
   });
 }
 
+// ===== LED STRIP DRAWING =====
+function drawLEDStrip(x, y, z, w, d) {
+  // Thin warm yellow line under wall cabinets
+  const pts = [
+    project(x, y, z),
+    project(x + w, y, z),
+    project(x + w, y, z + d),
+    project(x, y, z + d)
+  ];
+  ctx.beginPath();
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255, 200, 60, 0.6)';
+  ctx.fill();
+  // Glow effect
+  ctx.shadowColor = 'rgba(255, 200, 60, 0.5)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  ctx.lineTo(pts[1].x, pts[1].y);
+  ctx.lineTo(pts[2].x, pts[2].y);
+  ctx.lineTo(pts[3].x, pts[3].y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'transparent';
+}
+
 // ===== KITCHEN COMPONENTS =====
 function drawKitchen() {
   const baseH = 720, plinth = 130, ctrTop = 28, ctrDepth = 650;
   const totalBase = plinth + baseH; // 850
-  const wallCabBot = 1500, wallCabH = 400, wallCabD = 370;
+  const wallCabBot = 1500, wallCabH = 800, wallCabD = 370;
 
   // ---- WALL C (Left / x=0 side, along Z axis, 3400mm) ----
-  // Layout from back (z=0) to entrance (z=3400):
-  // Blind corner → Hob 80 → Shelf 80 → Shelf 80 → Drawers 60
+  // V3 Layout from back (z=0) to entrance (z=3400):
+  // Corner carousel 80 → Drawer 80 (hob) → Drawer 80 → Drawer 80 → Pull-out 20
 
-  // Blind corner (connects to back wall)
-  drawBox(0, plinth, 0, ctrDepth, baseH, 650, '#e0e0d8', 'Corner');
-  // Hob cabinet 80cm (gas stove, no chimney)
-  drawBox(0, plinth, 650, ctrDepth, baseH, 800, '#e8e8e0', 'Hob 80');
-  // Gas stove surface
-  drawBox(20, totalBase+ctrTop+1, 700, 610, 8, 700, '#333333', '');
-  // Burner dots (3 burners)
-  drawBox(100, totalBase+ctrTop+10, 850, 60, 5, 60, '#c0392b', '');
-  drawBox(300, totalBase+ctrTop+10, 850, 60, 5, 60, '#c0392b', '');
-  drawBox(500, totalBase+ctrTop+10, 850, 60, 5, 60, '#c0392b', '');
-  // Shelf cabinet 80cm
-  drawBox(0, plinth, 1450, ctrDepth, baseH, 800, '#e8e8e0', 'Shelf 80');
-  // Shelf cabinet 80cm
-  drawBox(0, plinth, 2250, ctrDepth, baseH, 800, '#e8e8e0', 'Shelf 80');
-  // Drawer cabinet 60cm (nearest entrance)
-  drawBox(0, plinth, 3050, ctrDepth, baseH, 350, '#e8e8e0', 'Draw 60');
-  // Countertop Wall C (over all base units except corner)
-  drawBox(0, totalBase, 650, ctrDepth, ctrTop, 2750, '#f5f0e0', '');
-  // Wall cabinets Wall C: 3x 80cm
-  drawBox(0, wallCabBot, 650, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
-  drawBox(0, wallCabBot, 1450, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
-  drawBox(0, wallCabBot, 2250, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
+  // 1. Corner carousel base (z=0 to z=800, 80cm along wall, 65cm deep)
+  drawBox(0, plinth, 0, ctrDepth, baseH, 800, '#e0e0d8', 'Corner Carousel');
+
+  // 2. 80cm drawer base #1 (z=800 to z=1600) - GAS HOB on top
+  drawBox(0, plinth, 800, ctrDepth, baseH, 800, '#e8e8e0', 'Drawer 80');
+  // Gas hob surface 60cm wide (LAGAN)
+  drawBox(25, totalBase+ctrTop+1, 900, 600, 8, 600, '#333333', '');
+  // 4 burner dots
+  drawBox(100, totalBase+ctrTop+10, 1000, 50, 5, 50, '#c0392b', '');
+  drawBox(300, totalBase+ctrTop+10, 1000, 50, 5, 50, '#c0392b', '');
+  drawBox(100, totalBase+ctrTop+10, 1300, 50, 5, 50, '#c0392b', '');
+  drawBox(300, totalBase+ctrTop+10, 1300, 50, 5, 50, '#c0392b', '');
+  // Hob label
+  drawBox(450, totalBase+ctrTop+10, 1150, 5, 5, 5, '#c0392b', 'LAGAN 60');
+
+  // 3. 80cm drawer base #2 (z=1600 to z=2400)
+  drawBox(0, plinth, 1600, ctrDepth, baseH, 800, '#e8e8e0', 'Drawer 80');
+
+  // 4. 80cm drawer base #3 (z=2400 to z=3200)
+  drawBox(0, plinth, 2400, ctrDepth, baseH, 800, '#e8e8e0', 'Drawer 80');
+
+  // 5. 20cm pull-out (z=3200 to z=3400)
+  drawBox(0, plinth, 3200, ctrDepth, baseH, 200, '#e8e8e0', 'Pull 20');
+
+  // Countertop Wall C (over base cabs z=800 to z=3400, NOT over corner)
+  drawBox(0, totalBase, 800, ctrDepth, ctrTop, 2600, '#f5f0e0', '');
+
+  // Wall cabinets Wall C: corner + 3x 80cm (all 800mm TALL now)
+  // Corner wall cabinet (z=0 to z=800, 80x37x80cm)
+  drawBox(0, wallCabBot, 0, wallCabD, wallCabH, 800, '#d0d0c8', 'WallCorner');
+  // Wall cab 80cm (z=800 to z=1600)
+  drawBox(0, wallCabBot, 800, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
+  // Wall cab 80cm (z=1600 to z=2400)
+  drawBox(0, wallCabBot, 1600, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
+  // Wall cab 80cm (z=2400 to z=3200)
+  drawBox(0, wallCabBot, 2400, wallCabD, wallCabH, 800, '#d0d0c8', 'Wall 80');
+
+  // LED strips under each wall cab on Wall C
+  drawLEDStrip(0, wallCabBot - 5, 0, wallCabD, 800);
+  drawLEDStrip(0, wallCabBot - 5, 800, wallCabD, 800);
+  drawLEDStrip(0, wallCabBot - 5, 1600, wallCabD, 800);
+  drawLEDStrip(0, wallCabBot - 5, 2400, wallCabD, 800);
 
   // ---- BACK WALL (z=0 side, along X axis, 2750mm) ----
-  // L-corner counter connecting Wall C to Wall A
-  // Blind corner left (Wall C side, already drawn above)
-  // Base cabinet(s) in middle
-  drawBox(650, plinth, 0, 800, baseH, ctrDepth, '#e8e8e0', 'Base 80');
-  drawBox(1450, plinth, 0, 650, baseH, ctrDepth, '#e8e8e0', 'Base 65');
-  // Blind corner right (Wall A side)
-  drawBox(2100, plinth, 0, ctrDepth, baseH, ctrDepth, '#e0e0d8', 'Corner');
-  // Countertop back wall
+  // Left corner (Wall C side) already drawn above as corner carousel
+  // ME 219: 30cm pull-out (x=650 to x=950)
+  drawBox(650, plinth, 0, 300, baseH, ctrDepth, '#e8e8e0', 'Pull 30');
+  // ME 157: 60cm drawers (x=950 to x=1550)
+  drawBox(950, plinth, 0, 600, baseH, ctrDepth, '#e8e8e0', 'Draw 60');
+  // Filler piece (x=1550 to ~x=1620)
+  drawBox(1550, plinth, 0, 70, baseH, ctrDepth, '#ddddd5', 'Filler');
+  // Right corner (Wall A side, part of corner sink cabinet)
+  drawBox(1620, plinth, 0, RW-1620, baseH, ctrDepth, '#e0e0d8', 'Corner Sink');
+  // Countertop back wall (full width)
   drawBox(0, totalBase, 0, RW, ctrTop, ctrDepth, '#f5f0e0', '');
 
   // ---- WALL A (Right / x=2750 side, along Z axis, 3400mm) ----
-  // Layout from back (z=0) to entrance (z=3400):
-  // Corner → Sink → Open Space → Fridge → Oven+Appliance
+  // V3 Layout from back (z=0) to entrance (z=3400):
+  // Corner sink 675 → Dishwasher 600 → Open → Fridge 780 → Tall oven/micro 600 → Gap
 
-  // L-corner from back wall (already part of corner above)
-  // Sink base (60cm) at z=500
-  drawBox(RW-ctrDepth, plinth, 500, ctrDepth, baseH, 600, '#e8e8e0', 'Sink 60');
-  // Sink basin
-  drawBox(RW-600, totalBase+ctrTop+2, 600, 500, 30, 400, '#1a6bb5', '');
-  // Countertop Wall A (corner + sink area, z=0 to z=1100)
-  drawBox(RW-ctrDepth, totalBase, 0, ctrDepth, ctrTop, 1100, '#f5f0e0', '');
+  // 1. Corner sink cabinet (z=0 to z=675, extends along back wall too)
+  drawBox(RW-ctrDepth, plinth, 0, ctrDepth, baseH, 675, '#e8e8e0', 'Sink Cab');
+  // KILSVIKEN black quartz sink on top
+  drawBox(RW-580, totalBase+ctrTop+2, 80, 480, 30, 500, '#1a1a1a', 'KILSVIKEN');
 
-  // Open space: z=1100 to z=2000 (nothing here)
+  // 2. Integrated dishwasher 60cm (z=675 to z=1275)
+  drawBox(RW-ctrDepth, plinth, 675, ctrDepth, baseH, 600, '#5588bb', 'Dishwasher');
+  // Dishwasher front panel detail
+  drawBox(RW-ctrDepth-1, plinth+100, 675, 5, 520, 600, '#4477aa', '');
 
-  // Fridge (80cm along wall, 70cm deep) at z=2000
-  drawBox(RW-700, plinth, 2000, 700, 1750-plinth, 800, '#3d3d3d', 'Fridge');
+  // Countertop Wall A (z=0 to z=1275, over corner sink + dishwasher)
+  drawBox(RW-ctrDepth, totalBase, 0, ctrDepth, ctrTop, 1275, '#f5f0e0', '');
 
-  // Oven + Appliance tall unit (60cm) at z=2800, near entrance
-  drawBox(RW-600, plinth, 2800, 600, 2200-plinth, 600, '#7f8c8d', '');
-  // Oven inside
-  drawBox(RW-595, 600, 2805, 590, 595, 570, '#4a4a4a', 'Oven');
+  // 3. Open space (z=1275 to z=1812) - nothing here
+
+  // 4. Fridge freestanding 780mm (z=1812 to z=2592)
+  drawBox(RW-700, plinth, 1812, 700, 1750-plinth, 780, '#3d3d3d', 'Fridge 780');
+
+  // 5. Tall oven/micro cabinet 60cm, 200cm HIGH (z=2592 to z=3192)
+  drawBox(RW-600, plinth, 2592, 600, 2000-plinth, 600, '#7f8c8d', '');
+  // Oven below
+  drawBox(RW-595, 400, 2597, 590, 595, 570, '#4a4a4a', 'Oven');
   // Microwave above oven
-  drawBox(RW-595, 1200, 2805, 590, 382, 380, '#4a4a4a', 'Micro');
+  drawBox(RW-595, 1050, 2597, 590, 382, 380, '#4a4a4a', 'Micro');
+
+  // 6. Gap to entrance (z=3192 to z=3400) - empty
+
+  // ---- Wall A wall cabinet ----
+  // 30cm wall cab (80cm tall) above sink area
+  drawBox(RW-wallCabD, wallCabBot, 0, wallCabD, wallCabH, 300, '#d0d0c8', 'Wall 30');
+  // LED strip under Wall A cab
+  drawLEDStrip(RW-wallCabD, wallCabBot - 5, 0, wallCabD, 300);
 
   // Backsplash hints on Wall C and back wall
-  drawBox(0, totalBase+ctrTop, 0, 3, 600, RD, '#c8c8c0', '', false);
-  drawBox(0, totalBase+ctrTop, 0, RW, 600, 3, '#c8c8c0', '', false);
+  drawBox(0, totalBase+ctrTop, 0, 3, 650, RD, '#c8c8c0', '', false);
+  drawBox(0, totalBase+ctrTop, 0, RW, 650, 3, '#c8c8c0', '', false);
 }
 
 // ===== DIMENSION LINES =====
@@ -392,10 +455,16 @@ function drawDimensions() {
   drawDimLine([-150, 0, 1500], [-150, 850, 1500], '850', 0);
   // Wall cab bottom
   drawDimLine([-150, 850, 1000], [-150, 1500, 1000], '1500', 0);
+  // Wall cab height (800mm: 1500 to 2300)
+  drawDimLine([-150, 1500, 1800], [-150, 2300, 1800], '800', 0);
   // Window on Wall C
   drawDimLine([-150, 2350, 450], [-150, 2350, 1950], '1500 mm', -16);
-  // Tall unit height on Wall A
-  drawDimLine([RW+100, 0, 2800], [RW+100, 2200, 2800], '2200', 0);
+  // Tall unit height on Wall A (now 2000mm)
+  drawDimLine([RW+100, 0, 2592], [RW+100, 2000, 2592], '2000', 0);
+  // Dishwasher width on Wall A
+  drawDimLine([RW+100, -100, 675], [RW+100, -100, 1275], '600 DW', -16);
+  // Fridge on Wall A
+  drawDimLine([RW+100, -100, 1812], [RW+100, -100, 2592], '780 Fridge', -16);
 }
 
 // ===== RENDER =====
