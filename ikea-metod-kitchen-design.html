@@ -33,7 +33,7 @@
     padding: 3px 12px; border-radius: 4px; font-size: 12px; font-weight: 700;
     margin-top: 10px;
   }
-  .container { max-width: 1280px; margin: 0 auto; padding: 30px 40px 60px; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 30px 40px 60px; overflow-x: hidden; }
   nav.toc {
     background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
     padding: 20px 28px; margin-bottom: 30px;
@@ -64,6 +64,46 @@
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
   @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) {
+    header { padding: 20px 16px; }
+    header h1 { font-size: 20px; }
+    header p { font-size: 12px; }
+    .container { padding: 16px 16px 40px; }
+    nav.toc { padding: 14px 16px; }
+    .card { padding: 14px 16px; }
+    h2 { font-size: 17px; }
+    h3 { font-size: 14px; }
+    table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    th { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
+    td { padding: 7px 10px; }
+    .flow-diagram { gap: 6px; padding: 12px; }
+    .flow-step { padding: 8px 12px; font-size: 12px; }
+    .flow-arrow { font-size: 16px; }
+    .room-diagram { font-size: 10px; padding: 12px; }
+    .room-diagram pre { font-size: 9px; }
+    .highlight, .note, .warn { padding: 10px 12px; font-size: 12px; }
+  }
+  @media (max-width: 480px) {
+    header { padding: 14px 12px; }
+    header h1 { font-size: 17px; }
+    header p { font-size: 11px; }
+    header .badge { font-size: 10px; padding: 2px 8px; }
+    .container { padding: 12px 10px 30px; }
+    nav.toc { padding: 10px 12px; }
+    nav.toc li { margin: 2px 0; }
+    nav.toc a { font-size: 12px; }
+    .card { padding: 10px 12px; margin-bottom: 12px; }
+    .card-header { font-size: 14px; }
+    h2 { font-size: 16px; padding-bottom: 6px; margin-bottom: 12px; }
+    table { font-size: 11px; }
+    th { padding: 6px 8px; font-size: 10px; }
+    td { padding: 6px 8px; }
+    .flow-diagram { flex-direction: column; align-items: stretch; }
+    .flow-step { text-align: center; }
+    .flow-arrow { transform: rotate(90deg); text-align: center; }
+    .room-diagram pre { font-size: 7.5px; overflow-x: auto; }
+    footer { padding: 14px 12px; font-size: 10px; }
+  }
   table {
     width: 100%; border-collapse: collapse; margin: 10px 0 16px;
     font-size: 13px; background: var(--card-bg);
